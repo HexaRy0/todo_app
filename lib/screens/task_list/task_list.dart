@@ -1,56 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:todo_app/model/category.dart';
 import 'package:todo_app/model/task.dart';
+import 'package:todo_app/providers/category_provider.dart';
+import 'package:todo_app/providers/task_provider.dart';
 import 'package:todo_app/widgets/chips.dart';
 
-class TaskListScreen extends StatefulWidget {
+class TaskListScreen extends ConsumerStatefulWidget {
   const TaskListScreen({super.key});
 
   @override
-  State<TaskListScreen> createState() => TaskListScreenState();
+  ConsumerState<TaskListScreen> createState() => TaskListScreenState();
 }
 
-class TaskListScreenState extends State<TaskListScreen> {
-  Category selectedCategory = Category.getCategoryById("1");
-  List<TaskData> taskList = [
-    TaskData(
-      title: "Test",
-      description: "description",
-      date: DateTime.now(),
-      category: Category.getCategoryById("2"),
-    ),
-    TaskData(
-      title: "Test",
-      description: "description",
-      date: DateTime.now(),
-      category: Category.getCategoryById("2"),
-    ),
-    TaskData(
-      title: "Test",
-      description: "description",
-      date: DateTime.now(),
-      category: Category.getCategoryById("3"),
-    ),
-    TaskData(
-      title: "Test",
-      description: "description",
-      date: DateTime.now(),
-      category: Category.getCategoryById("4"),
-    ),
-    TaskData(
-      title: "Test",
-      description: "description",
-      date: DateTime.now(),
-      category: Category.getCategoryById("5"),
-    ),
-  ];
+class TaskListScreenState extends ConsumerState<TaskListScreen> {
+  late CategoryData? selectedCategory;
+
+  @override
+  void initState() {
+    selectedCategory = ref.read(categoriesProvider)[0];
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    List<TaskData> filteredTaskList = selectedCategory == Category.getCategoryById("1")
-        ? taskList
-        : taskList.where((element) => element.category == selectedCategory).toList();
+    final tasks = ref.watch(tasksProvider);
+    final categories = ref.watch(categoriesProvider);
+    List<TaskData> filteredTaskList = selectedCategory == categories[0]
+        ? tasks
+        : tasks.where((element) => element.category == selectedCategory).toList();
 
     return ListView(
       primary: true,
@@ -64,15 +43,15 @@ class TaskListScreenState extends State<TaskListScreen> {
                 height: 48,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  itemCount: Category.categoryList.length,
+                  itemCount: categories.length,
                   itemBuilder: (context, index) {
                     return Chips(
-                      icon: Category.categoryList[index].icon,
-                      text: Category.categoryList[index].name,
-                      isActive: selectedCategory == Category.categoryList[index],
+                      icon: categories[index].icon,
+                      text: categories[index].name,
+                      isActive: selectedCategory == categories[index],
                       onPressed: () {
                         setState(() {
-                          selectedCategory = Category.categoryList[index];
+                          selectedCategory = categories[index];
                         });
                       },
                     );
@@ -89,9 +68,7 @@ class TaskListScreenState extends State<TaskListScreen> {
           itemBuilder: (context, index) {
             return GestureDetector(
               onTap: () {
-                setState(() {
-                  print("tapped");
-                });
+                setState(() {});
               },
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

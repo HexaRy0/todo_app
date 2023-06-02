@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todo_app/screens/add_task/add_task.dart';
 import 'package:todo_app/screens/task_list/task_list.dart';
 import 'package:todo_app/widgets/menu_button.dart';
 
@@ -17,6 +18,21 @@ class _HomeScreenState extends State<HomeScreen> {
     Container(),
   ];
 
+  void _showAddTaskBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(16),
+        ),
+      ),
+      builder: (context) {
+        return const AddTaskScreen();
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: _pages[index],
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
+        onPressed: _showAddTaskBottomSheet,
         icon: const Icon(Icons.add),
         label: const Text('Add Task'),
       ),
