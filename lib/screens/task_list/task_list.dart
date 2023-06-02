@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 import 'package:todo_app/model/category.dart';
 import 'package:todo_app/model/task.dart';
@@ -15,50 +16,51 @@ class TaskListScreen extends ConsumerStatefulWidget {
 }
 
 class TaskListScreenState extends ConsumerState<TaskListScreen> {
-  late CategoryData? selectedCategory;
-
-  @override
-  void initState() {
-    selectedCategory = ref.read(categoriesProvider)[0];
-    super.initState();
-  }
+  CategoryData? selectedCategory;
 
   @override
   Widget build(BuildContext context) {
     final tasks = ref.watch(tasksProvider);
     final categories = ref.watch(categoriesProvider);
-    List<TaskData> filteredTaskList = selectedCategory == categories[0]
+    List<TaskData> filteredTaskList = selectedCategory == null
         ? tasks
         : tasks.where((element) => element.category == selectedCategory).toList();
 
     return ListView(
+      shrinkWrap: true,
       primary: true,
       children: [
         Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                height: 48,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: categories.length,
-                  itemBuilder: (context, index) {
-                    return Chips(
-                      icon: categories[index].icon,
-                      text: categories[index].name,
-                      isActive: selectedCategory == categories[index],
-                      onPressed: () {
-                        setState(() {
-                          selectedCategory = categories[index];
-                        });
-                      },
-                    );
+          child: SizedBox(
+            height: 48,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              shrinkWrap: true,
+              children: [
+                Chips(
+                  icon: Icons.category,
+                  text: "All",
+                  isActive: selectedCategory == null,
+                  onPressed: () {
+                    setState(() {
+                      selectedCategory = null;
+                    });
                   },
                 ),
-              ),
-            ],
+                for (final category in categories)
+                  Chips(
+                    icon: category.icon,
+                    text: category.name,
+                    isActive: selectedCategory == category,
+                    onPressed: () {
+                      setState(() {
+                        selectedCategory = category;
+                      });
+                    },
+                  ),
+              ],
+            ),
           ),
         ),
         ListView.builder(
@@ -66,116 +68,201 @@ class TaskListScreenState extends ConsumerState<TaskListScreen> {
           itemCount: filteredTaskList.length,
           shrinkWrap: true,
           itemBuilder: (context, index) {
-            return GestureDetector(
-              onTap: () {
-                setState(() {});
-              },
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+            final task = filteredTaskList[index];
+            final isTaskFinished = task.isCompleted;
+
+            return Container(
+              margin: const EdgeInsets.symmetric(vertical: 4),
+              child: Slidable(
+                key: Key(task.id),
+                groupTag: "task",
+                startActionPane: ActionPane(
+                  motion: const ScrollMotion(),
+                  extentRatio: 0.25,
+                  children: [
+                    SlidableAction(
+                      borderRadius: BorderRadius.circular(8),
+                      onPressed: (context) {
+                        ref.read(tasksProvider.notifier).toggleTask(task);
+                      },
+                      backgroundColor: ColorScheme.fromSeed(
+                        seedColor: !isTaskFinished ? Colors.green : Colors.red,
+                        brightness: Theme.of(context).brightness,
+                      ).primaryContainer,
+                      foregroundColor: ColorScheme.fromSeed(
+                        seedColor: !isTaskFinished ? Colors.green : Colors.red,
+                        brightness: Theme.of(context).brightness,
+                      ).onPrimaryContainer,
+                      icon: !isTaskFinished ? Icons.check_circle_outline : Icons.close,
+                      label: !isTaskFinished ? 'Finish' : 'Unfinish',
                     ),
                   ],
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Transform.scale(
-                        scale: 1.25,
-                        child: Checkbox(
-                          shape: const CircleBorder(),
-                          value: filteredTaskList[index].isCompleted,
-                          onChanged: (value) {
-                            setState(() {
-                              filteredTaskList[index].isCompleted = value!;
-                            });
-                          },
-                        ),
+                endActionPane: ActionPane(
+                  motion: const ScrollMotion(),
+                  extentRatio: 0.5,
+                  dismissible: DismissiblePane(onDismissed: () {
+                    ref.read(tasksProvider.notifier).removeTask(task);
+                  }),
+                  children: [
+                    SlidableAction(
+                      flex: 5,
+                      borderRadius: BorderRadius.circular(8),
+                      onPressed: (context) {},
+                      backgroundColor: ColorScheme.fromSeed(
+                        seedColor: Colors.orange,
+                        brightness: Theme.of(context).brightness,
+                      ).primaryContainer,
+                      foregroundColor: ColorScheme.fromSeed(
+                        seedColor: Colors.orange,
+                        brightness: Theme.of(context).brightness,
+                      ).onPrimaryContainer,
+                      icon: Icons.edit_outlined,
+                      label: 'Edit',
+                    ),
+                    const Flexible(
+                      flex: 1,
+                      child: SizedBox(
+                        width: 8,
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              filteredTaskList[index].title,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
+                    ),
+                    SlidableAction(
+                      flex: 5,
+                      borderRadius: BorderRadius.circular(8),
+                      onPressed: (context) {
+                        ref.read(tasksProvider.notifier).removeTask(task);
+                      },
+                      backgroundColor: ColorScheme.fromSeed(
+                        seedColor: Colors.red,
+                        brightness: Theme.of(context).brightness,
+                      ).primaryContainer,
+                      foregroundColor: ColorScheme.fromSeed(
+                        seedColor: Colors.red,
+                        brightness: Theme.of(context).brightness,
+                      ).onPrimaryContainer,
+                      icon: Icons.delete_outline,
+                      label: 'Delete',
+                    ),
+                  ],
+                ),
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {});
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Transform.scale(
+                            scale: 1.25,
+                            child: Checkbox(
+                              shape: const CircleBorder(),
+                              value: isTaskFinished,
+                              onChanged: (value) {
+                                setState(() {
+                                  task.isCompleted = value!;
+                                });
+                              },
                             ),
-                            Text(
-                              filteredTaskList[index].description,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Wrap(
-                              direction: Axis.horizontal,
-                              spacing: 5.0,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.calendar_today,
-                                      size: 16,
-                                      color:
-                                          Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      DateFormat.yMd().format(filteredTaskList[index].date),
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w400,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSurface
-                                            .withOpacity(0.5),
-                                      ),
-                                    ),
-                                  ],
+                                Text(
+                                  task.title,
+                                  style: TextStyle(
+                                    decoration: isTaskFinished ? TextDecoration.lineThrough : null,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
+                                Text(
+                                  task.description,
+                                  style: TextStyle(
+                                    decoration: isTaskFinished ? TextDecoration.lineThrough : null,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Wrap(
+                                  direction: Axis.horizontal,
+                                  spacing: 5.0,
                                   children: [
-                                    Icon(
-                                      filteredTaskList[index].category.icon,
-                                      size: 16,
-                                      color:
-                                          Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.calendar_today,
+                                          size: 16,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface
+                                              .withOpacity(0.5),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          DateFormat.yMd().format(task.date),
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurface
+                                                .withOpacity(0.5),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      filteredTaskList[index].category.name,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w400,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSurface
-                                            .withOpacity(0.5),
-                                      ),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          task.category?.icon ?? Icons.category,
+                                          size: 16,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface
+                                              .withOpacity(0.5),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          task.category?.name ?? "No Category",
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurface
+                                                .withOpacity(0.5),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
                               ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),

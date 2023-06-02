@@ -9,43 +9,18 @@ class CategoriesClass extends StateNotifier<List<CategoryData>> {
               [
                 CategoryData(
                   id: "1",
-                  name: "All",
-                  icon: Icons.task_alt,
-                ),
-                CategoryData(
-                  id: "2",
                   name: "Work",
                   icon: Icons.work,
                 ),
                 CategoryData(
-                  id: "3",
+                  id: "2",
                   name: "Personal",
                   icon: Icons.person,
                 ),
                 CategoryData(
-                  id: "4",
+                  id: "3",
                   name: "Shopping",
                   icon: Icons.shopping_bag,
-                ),
-                CategoryData(
-                  id: "5",
-                  name: "Happy",
-                  icon: Icons.mood,
-                ),
-                CategoryData(
-                  id: "6",
-                  name: "Sad",
-                  icon: Icons.mood_bad,
-                ),
-                CategoryData(
-                  id: "7",
-                  name: "Angry",
-                  icon: Icons.mode_edit_outline,
-                ),
-                CategoryData(
-                  id: "8",
-                  name: "Others",
-                  icon: Icons.category,
                 ),
               ],
         );

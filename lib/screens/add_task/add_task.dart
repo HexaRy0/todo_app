@@ -3,8 +3,11 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:todo_app/model/category.dart';
+import 'package:todo_app/model/task.dart';
 import 'package:todo_app/providers/category_provider.dart';
+import 'package:todo_app/providers/task_provider.dart';
 import 'package:todo_app/widgets/chips.dart';
+import 'package:uuid/uuid.dart';
 
 class AddTaskScreen extends ConsumerStatefulWidget {
   const AddTaskScreen({super.key});
@@ -15,8 +18,25 @@ class AddTaskScreen extends ConsumerStatefulWidget {
 
 class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
   final GlobalKey<FormBuilderState> _addTaskFormKey = GlobalKey<FormBuilderState>();
+  final uuid = const Uuid();
   CategoryData? _selectedCategory;
   DateTime? _pickedDate;
+
+  void _addNewTask() {
+    if (_addTaskFormKey.currentState!.saveAndValidate()) {
+      final formData = _addTaskFormKey.currentState!.value;
+      final newTask = TaskData(
+        id: uuid.v4(),
+        title: formData['title'],
+        description: formData['description'],
+        date: _pickedDate ?? DateTime.now(),
+        category: _selectedCategory,
+      );
+
+      ref.read(tasksProvider.notifier).addTask(newTask);
+      Navigator.pop(context);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +53,7 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
           left: 16,
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
             FormBuilderTextField(
@@ -89,7 +110,9 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
               },
             ),
             const SizedBox(height: 16),
-            Row(
+            Wrap(
+              runSpacing: 8,
+              direction: Axis.horizontal,
               children: [
                 SizedBox(
                   height: 48,
@@ -215,6 +238,28 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
                   ),
                 ),
               ],
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+                onPressed: _addNewTask,
+                icon: Icon(
+                  Icons.add,
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                ),
+                label: Text(
+                  "Add Task",
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
+                ),
+              ),
             ),
           ],
         ),
