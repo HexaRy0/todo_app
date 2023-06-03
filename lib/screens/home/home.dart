@@ -49,11 +49,13 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       body: _pages[index],
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _showAddTaskBottomSheet,
-        icon: const Icon(Icons.add),
-        label: const Text('Add Task'),
-      ),
+      floatingActionButton: index == 0
+          ? FloatingActionButton.extended(
+              onPressed: _showAddTaskBottomSheet,
+              icon: const Icon(Icons.add),
+              label: const Text('Add Task'),
+            )
+          : null,
       bottomNavigationBar: BottomAppBar(
         height: 96,
         child: Row(
