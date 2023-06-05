@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:todo_app/model/category.dart';
 import 'package:todo_app/model/task.dart';
-import 'package:todo_app/providers/category_provider.dart';
 import 'package:todo_app/providers/task_provider.dart';
-import 'package:todo_app/widgets/chips.dart';
+import 'package:todo_app/widgets/category_list.dart';
 import 'package:todo_app/widgets/task_option.dart';
 
 class TaskDetailScreen extends ConsumerStatefulWidget {
@@ -22,77 +20,11 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
   final TextEditingController _descriptionController = TextEditingController();
   bool isRemoved = false;
 
-  void _onSelectCategory(List<CategoryData> categories, TaskData task) {
+  void _onSelectCategory(TaskData task) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Select Category"),
-        content: SizedBox(
-          width: 300,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  height: 48,
-                  width: double.infinity,
-                  child: Chips(
-                    icon: Icons.category,
-                    text: "No Category",
-                    isActive: true,
-                    onPressed: () {
-                      setState(() {
-                        final newTask = TaskData(
-                          id: task.id,
-                          title: task.title,
-                          description: task.description,
-                          date: task.date,
-                          time: task.time,
-                          category: null,
-                          isStarred: task.isStarred,
-                          isCompleted: task.isCompleted,
-                        );
-
-                        ref.read(tasksProvider.notifier).forceUpdateTask(newTask);
-                      });
-                      Navigator.pop(context);
-                    },
-                  ),
-                ),
-                ...categories.map((category) {
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    height: 48,
-                    width: double.infinity,
-                    child: Chips(
-                      icon: category.icon,
-                      text: category.name,
-                      isActive: true,
-                      onPressed: () {
-                        setState(() {
-                          ref
-                              .read(tasksProvider.notifier)
-                              .updateTask(task.copyWith(category: category));
-                        });
-                        Navigator.pop(context);
-                      },
-                    ),
-                  );
-                }),
-                const SizedBox(
-                  height: 48,
-                  width: double.infinity,
-                  child: Chips(
-                    icon: Icons.add,
-                    text: "Add New Category",
-                    isActive: true,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+      builder: (context) => CategoryList(
+        task: task,
       ),
     );
   }
@@ -112,7 +44,6 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
       return const Scaffold();
     }
     final task = ref.watch(tasksProvider).firstWhere((element) => element.id == widget.taskId);
-    final categories = ref.watch(categoriesProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -142,10 +73,11 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
             children: [
               TaskOption(
                 onPressed: () {
-                  _onSelectCategory(categories, task);
+                  _onSelectCategory(task);
                 },
                 icon: task.category?.icon ?? Icons.category,
                 title: task.category?.name ?? "No Category",
+                color: task.category?.color,
                 isValueSet: false,
                 onReset: () {},
               ),

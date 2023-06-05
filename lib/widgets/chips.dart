@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:todo_app/model/category.dart';
 
 class Chips extends StatefulWidget {
   const Chips({
     super.key,
-    required this.icon,
-    required this.text,
+    required this.category,
     required this.isActive,
     this.onPressed,
   });
 
-  final IconData icon;
-  final String text;
+  final CategoryData category;
   final bool isActive;
   final void Function()? onPressed;
 
@@ -30,24 +29,36 @@ class _ChipsState extends State<Chips> {
         margin: const EdgeInsets.only(right: 8),
         decoration: BoxDecoration(
           color: widget.isActive
-              ? Theme.of(context).colorScheme.primaryContainer
-              : Theme.of(context).colorScheme.primaryContainer.withOpacity(0.25),
+              ? ColorScheme.fromSeed(
+                  seedColor: widget.category.color,
+                  brightness: Theme.of(context).brightness,
+                ).primaryContainer
+              : ColorScheme.fromSeed(
+                  seedColor: widget.category.color,
+                  brightness: Theme.of(context).brightness,
+                ).primaryContainer.withOpacity(0.25),
           borderRadius: BorderRadius.circular(999),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              widget.icon,
+              widget.category.icon,
               size: 24,
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
+              color: ColorScheme.fromSeed(
+                seedColor: widget.category.color,
+                brightness: Theme.of(context).brightness,
+              ).onPrimaryContainer,
             ),
             const SizedBox(width: 8),
             Text(
-              widget.text,
+              widget.category.name,
               style: TextStyle(
                 fontSize: 16,
-                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                color: ColorScheme.fromSeed(
+                  seedColor: widget.category.color,
+                  brightness: Theme.of(context).brightness,
+                ).onPrimaryContainer,
               ),
             ),
           ],

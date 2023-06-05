@@ -42,8 +42,7 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
                     height: 48,
                     width: double.infinity,
                     child: Chips(
-                      icon: category.icon,
-                      text: category.name,
+                      category: category,
                       isActive: true,
                       onPressed: () {
                         setState(() {
@@ -54,12 +53,16 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
                     ),
                   );
                 }),
-                const SizedBox(
+                SizedBox(
                   height: 48,
                   width: double.infinity,
                   child: Chips(
-                    icon: Icons.add,
-                    text: "Add New Category",
+                    category: CategoryData(
+                      id: "new",
+                      name: "Add Category",
+                      icon: Icons.add,
+                      color: Theme.of(context).colorScheme.primaryContainer,
+                    ),
                     isActive: true,
                   ),
                 ),

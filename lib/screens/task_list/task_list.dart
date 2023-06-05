@@ -17,12 +17,11 @@ class TaskListScreen extends ConsumerStatefulWidget {
 }
 
 class TaskListScreenState extends ConsumerState<TaskListScreen> {
-  CategoryData? selectedCategory;
-
   @override
   Widget build(BuildContext context) {
     final tasks = ref.watch(tasksProvider);
     final categories = ref.watch(categoriesProvider);
+    final selectedCategory = ref.watch(selectedCategoryProvider);
     List<TaskData> filteredTaskList = selectedCategory == null
         ? tasks
         : tasks.where((element) => element.category == selectedCategory).toList();
@@ -40,23 +39,26 @@ class TaskListScreenState extends ConsumerState<TaskListScreen> {
               shrinkWrap: true,
               children: [
                 Chips(
-                  icon: Icons.category,
-                  text: "All",
+                  category: CategoryData(
+                    id: "all",
+                    name: "All",
+                    icon: Icons.category,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                   isActive: selectedCategory == null,
                   onPressed: () {
                     setState(() {
-                      selectedCategory = null;
+                      ref.read(selectedCategoryProvider.notifier).selectCategory(null);
                     });
                   },
                 ),
                 for (final category in categories)
                   Chips(
-                    icon: category.icon,
-                    text: category.name,
+                    category: category,
                     isActive: selectedCategory == category,
                     onPressed: () {
                       setState(() {
-                        selectedCategory = category;
+                        ref.read(selectedCategoryProvider.notifier).selectCategory(category);
                       });
                     },
                   ),
@@ -198,7 +200,12 @@ class TaskListScreenState extends ConsumerState<TaskListScreen> {
                     child: Container(
                       margin: const EdgeInsets.symmetric(horizontal: 8),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primaryContainer,
+                        color: task.category != null
+                            ? ColorScheme.fromSeed(
+                                seedColor: task.category!.color,
+                                brightness: Theme.of(context).brightness,
+                              ).primaryContainer
+                            : Theme.of(context).colorScheme.primaryContainer,
                         borderRadius: BorderRadius.circular(8),
                         boxShadow: [
                           BoxShadow(
@@ -230,14 +237,30 @@ class TaskListScreenState extends ConsumerState<TaskListScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    task.title,
-                                    style: TextStyle(
-                                      decoration:
-                                          isTaskFinished ? TextDecoration.lineThrough : null,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        task.title,
+                                        style: TextStyle(
+                                          decoration:
+                                              isTaskFinished ? TextDecoration.lineThrough : null,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        width: 8,
+                                      ),
+                                      if (task.isStarred)
+                                        Icon(
+                                          Icons.star,
+                                          size: 16,
+                                          color: ColorScheme.fromSeed(
+                                            seedColor: Colors.yellow,
+                                            brightness: Theme.of(context).brightness,
+                                          ).primary,
+                                        ),
+                                    ],
                                   ),
                                   if (task.description.isNotEmpty)
                                     Text(

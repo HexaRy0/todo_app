@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:todo_app/model/category.dart';
 import 'package:todo_app/providers/category_provider.dart';
 import 'package:todo_app/providers/task_provider.dart';
 import 'package:todo_app/screens/add_task/add_task.dart';
 import 'package:todo_app/screens/calendar/calendar.dart';
+import 'package:todo_app/screens/manage_categories/manage_categories.dart';
 import 'package:todo_app/screens/task_list/task_list.dart';
+import 'package:todo_app/widgets/category_setting_dialog.dart';
 import 'package:todo_app/widgets/menu_button.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -37,6 +40,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  void _openCategorySetting({
+    CategoryData? category,
+    bool isEdit = false,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) => CategorySettingDialog(
+        category: category,
+        isEdit: isEdit,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final tasks = ref.watch(tasksProvider);
@@ -46,96 +62,150 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: const Text('Todo App'),
-        actions: const [
+        actions: [
           Padding(
-            padding: EdgeInsets.all(8.0),
-            child: CircleAvatar(
-              child: Text('A'),
+            padding: const EdgeInsets.all(8.0),
+            child: PopupMenuButton(
+              offset: const Offset(0, 50),
+              itemBuilder: (context) {
+                return const [
+                  PopupMenuItem(
+                    value: 0,
+                    child: Text("My Account"),
+                  ),
+                  PopupMenuItem(
+                    value: 1,
+                    child: Text("Manage Categories"),
+                  ),
+                  PopupMenuItem(
+                    value: 2,
+                    child: Text("Logout"),
+                  ),
+                ];
+              },
+              onSelected: (value) {
+                if (value == 1) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const ManageCategoriesScreen(),
+                    ),
+                  );
+                }
+              },
+              child: CircleAvatar(
+                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                child: const Icon(
+                  Icons.person,
+                  color: Colors.white,
+                ),
+              ),
             ),
           ),
         ],
       ),
       drawer: Drawer(
-        child: Column(
-          children: [
-            UserAccountsDrawerHeader(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-              ),
-              accountName: const Text('Merza Bolivar'),
-              accountEmail: const Text('Merza.bolivar@Gmail.com'),
-              currentAccountPicture: CircleAvatar(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                child: Text(
-                  'A',
-                  style: TextStyle(
-                    fontSize: 32,
-                    color: Theme.of(context).colorScheme.onPrimary,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              UserAccountsDrawerHeader(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                ),
+                accountName: const Text('Merza Bolivar'),
+                accountEmail: const Text('Merza.bolivar@Gmail.com'),
+                currentAccountPicture: CircleAvatar(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  child: Text(
+                    'A',
+                    style: TextStyle(
+                      fontSize: 32,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
                   ),
                 ),
               ),
-            ),
-            ListTile(
-              onTap: () {},
-              leading: const Icon(Icons.star),
-              title: const Text('Starred Tasks'),
-            ),
-            ExpansionTile(
-              initiallyExpanded: true,
-              shape: ShapeBorder.lerp(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                1,
+              ListTile(
+                onTap: () {},
+                leading: const Icon(Icons.star),
+                title: const Text('Starred Tasks'),
               ),
-              leading: const Icon(Icons.category),
-              title: const Text('Categories'),
-              children: [
-                ...categories.map(
-                  (category) => Padding(
+              ExpansionTile(
+                initiallyExpanded: true,
+                shape: ShapeBorder.lerp(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  1,
+                ),
+                leading: const Icon(Icons.category),
+                title: const Text('Categories'),
+                children: [
+                  Padding(
                     padding: const EdgeInsets.only(left: 16),
                     child: ListTile(
-                      onTap: () {},
-                      leading: Icon(category.icon),
-                      title: Text(category.name),
+                      onTap: () {
+                        ref.read(selectedCategoryProvider.notifier).selectCategory(null);
+                        Navigator.of(context).pop();
+                      },
+                      leading: const Icon(Icons.category),
+                      title: const Text("All"),
                       trailing: Text(
-                        tasks.where((element) => element.category == category).length.toString(),
+                        tasks.length.toString(),
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
                         ),
                       ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 16),
-                  child: ListTile(
-                    onTap: () {},
-                    leading: const Icon(Icons.add),
-                    title: const Text('Add Category'),
+                  ...categories.map(
+                    (category) => Padding(
+                      padding: const EdgeInsets.only(left: 16),
+                      child: ListTile(
+                        onTap: () {
+                          ref.read(selectedCategoryProvider.notifier).selectCategory(category);
+                          Navigator.of(context).pop();
+                        },
+                        leading: Icon(category.icon),
+                        title: Text(category.name),
+                        trailing: Text(
+                          tasks.where((element) => element.category == category).length.toString(),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            ListTile(
-              onTap: () {},
-              leading: const Icon(Icons.favorite),
-              title: const Text('Donate'),
-            ),
-            ListTile(
-              onTap: () {},
-              leading: const Icon(Icons.question_mark),
-              title: const Text('FAQ'),
-            ),
-            ListTile(
-              onTap: () {},
-              leading: const Icon(Icons.settings),
-              title: const Text('Settings'),
-            ),
-          ],
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16),
+                    child: ListTile(
+                      onTap: _openCategorySetting,
+                      leading: const Icon(Icons.add),
+                      title: const Text('Add Category'),
+                    ),
+                  ),
+                ],
+              ),
+              ListTile(
+                onTap: () {},
+                leading: const Icon(Icons.favorite),
+                title: const Text('Donate'),
+              ),
+              ListTile(
+                onTap: () {},
+                leading: const Icon(Icons.question_mark),
+                title: const Text('FAQ'),
+              ),
+              ListTile(
+                onTap: () {},
+                leading: const Icon(Icons.settings),
+                title: const Text('Settings'),
+              ),
+            ],
+          ),
         ),
       ),
       body: _pages[index],

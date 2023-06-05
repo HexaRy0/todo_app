@@ -6,6 +6,7 @@ class TaskOption extends StatefulWidget {
     required this.onPressed,
     required this.icon,
     required this.title,
+    this.color,
     required this.isValueSet,
     required this.onReset,
   });
@@ -13,6 +14,7 @@ class TaskOption extends StatefulWidget {
   final void Function() onPressed;
   final IconData icon;
   final String title;
+  final Color? color;
   final bool isValueSet;
   final void Function() onReset;
 
@@ -31,7 +33,12 @@ class _TaskOptionState extends State<TaskOption> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           margin: const EdgeInsets.only(right: 8),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primaryContainer,
+            color: widget.color != null
+                ? ColorScheme.fromSeed(
+                    seedColor: widget.color!,
+                    brightness: Theme.of(context).brightness,
+                  ).primaryContainer
+                : Theme.of(context).colorScheme.primaryContainer,
             borderRadius: BorderRadius.circular(999),
           ),
           child: Row(
@@ -40,14 +47,24 @@ class _TaskOptionState extends State<TaskOption> {
               Icon(
                 widget.icon,
                 size: 20,
-                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                color: widget.color != null
+                    ? ColorScheme.fromSeed(
+                        seedColor: widget.color!,
+                        brightness: Theme.of(context).brightness,
+                      ).onPrimaryContainer
+                    : Theme.of(context).colorScheme.onPrimaryContainer,
               ),
               const SizedBox(width: 8),
               Text(
                 widget.title,
                 style: TextStyle(
                   fontSize: 14,
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  color: widget.color != null
+                      ? ColorScheme.fromSeed(
+                          seedColor: widget.color!,
+                          brightness: Theme.of(context).brightness,
+                        ).onPrimaryContainer
+                      : Theme.of(context).colorScheme.onPrimaryContainer,
                 ),
               ),
               if (widget.isValueSet) const SizedBox(width: 8),
@@ -57,7 +74,12 @@ class _TaskOptionState extends State<TaskOption> {
                   child: Icon(
                     Icons.close,
                     size: 16,
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    color: widget.color != null
+                        ? ColorScheme.fromSeed(
+                            seedColor: widget.color!,
+                            brightness: Theme.of(context).brightness,
+                          ).onPrimaryContainer
+                        : Theme.of(context).colorScheme.onPrimaryContainer,
                   ),
                 ),
             ],
