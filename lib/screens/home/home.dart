@@ -77,25 +77,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             ListTile(
               onTap: () {},
-              leading: Icon(
-                Icons.workspace_premium_outlined,
-                color: ColorScheme.fromSeed(
-                  seedColor: Colors.yellow,
-                  brightness: Theme.of(context).brightness,
-                ).primary,
-              ),
-              title: Text(
-                'Become a Pro Member',
-                style: TextStyle(
-                  color: ColorScheme.fromSeed(
-                    seedColor: Colors.yellow,
-                    brightness: Theme.of(context).brightness,
-                  ).primary,
-                ),
-              ),
-            ),
-            ListTile(
-              onTap: () {},
               leading: const Icon(Icons.star),
               title: const Text('Starred Tasks'),
             ),
