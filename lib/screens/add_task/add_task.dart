@@ -7,6 +7,7 @@ import 'package:todo_app/model/task.dart';
 import 'package:todo_app/providers/category_provider.dart';
 import 'package:todo_app/providers/task_provider.dart';
 import 'package:todo_app/widgets/chips.dart';
+import 'package:todo_app/widgets/task_option.dart';
 import 'package:uuid/uuid.dart';
 
 class AddTaskScreen extends ConsumerStatefulWidget {
@@ -21,6 +22,89 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
   final uuid = const Uuid();
   CategoryData? _selectedCategory;
   DateTime? _pickedDate;
+  DateTime? _pickedTime;
+  bool isTitleValid = false;
+
+  void _onSelectCategory(List<CategoryData> categories) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Select Category"),
+        content: SizedBox(
+          width: 300,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ...categories.map((category) {
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    height: 48,
+                    width: double.infinity,
+                    child: Chips(
+                      icon: category.icon,
+                      text: category.name,
+                      isActive: true,
+                      onPressed: () {
+                        setState(() {
+                          _selectedCategory = category;
+                        });
+                        Navigator.pop(context);
+                      },
+                    ),
+                  );
+                }),
+                const SizedBox(
+                  height: 48,
+                  width: double.infinity,
+                  child: Chips(
+                    icon: Icons.add,
+                    text: "Add New Category",
+                    isActive: true,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _onSelectDate() async {
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now().subtract(
+        const Duration(days: 365),
+      ),
+      lastDate: DateTime.now().add(
+        const Duration(days: 365),
+      ),
+    );
+
+    setState(() {
+      _pickedDate = pickedDate;
+    });
+  }
+
+  void _onSelectTime() async {
+    final pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: DateTime.now().hour, minute: DateTime.now().minute),
+    );
+
+    setState(() {
+      if (pickedTime == null) return;
+      _pickedTime = DateTime(
+        DateTime.now().year,
+        DateTime.now().month,
+        DateTime.now().day,
+        pickedTime.hour,
+        pickedTime.minute,
+      );
+    });
+  }
 
   void _addNewTask() {
     if (_addTaskFormKey.currentState!.saveAndValidate()) {
@@ -28,8 +112,9 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
       final newTask = TaskData(
         id: uuid.v4(),
         title: formData['title'],
-        description: formData['description'],
-        date: _pickedDate ?? DateTime.now(),
+        description: formData['description'] ?? "",
+        date: _pickedDate,
+        time: _pickedTime,
         category: _selectedCategory,
       );
 
@@ -74,6 +159,11 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
                   ),
                 ),
               ),
+              onChanged: (value) {
+                setState(() {
+                  if (value != null) isTitleValid = true;
+                });
+              },
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter title';
@@ -89,7 +179,7 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
               ),
               decoration: const InputDecoration(
                 filled: true,
-                hintText: "Enter Task Description",
+                hintText: "Enter Task Description (Optional)",
                 contentPadding: EdgeInsets.symmetric(
                   vertical: 4,
                   horizontal: 12,
@@ -102,142 +192,52 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
                   ),
                 ),
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter title';
-                }
-                return null;
-              },
             ),
             const SizedBox(height: 16),
             Wrap(
               runSpacing: 8,
               direction: Axis.horizontal,
               children: [
-                SizedBox(
-                  height: 48,
-                  child: GestureDetector(
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text("Select Category"),
-                          content: SizedBox(
-                            width: 300,
-                            child: SingleChildScrollView(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  ...categories.map((category) {
-                                    return Container(
-                                      margin: const EdgeInsets.only(bottom: 8),
-                                      height: 48,
-                                      width: double.infinity,
-                                      child: Chips(
-                                        icon: category.icon,
-                                        text: category.name,
-                                        isActive: true,
-                                        onPressed: () {
-                                          setState(() {
-                                            _selectedCategory = category;
-                                          });
-                                          Navigator.pop(context);
-                                        },
-                                      ),
-                                    );
-                                  }),
-                                  const SizedBox(
-                                    height: 48,
-                                    width: double.infinity,
-                                    child: Chips(
-                                      icon: Icons.add,
-                                      text: "Add New Category",
-                                      isActive: true,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      margin: const EdgeInsets.only(right: 8),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            _selectedCategory?.icon ?? Icons.category,
-                            size: 24,
-                            color: Theme.of(context).colorScheme.onPrimaryContainer,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            _selectedCategory?.name ?? "No Category",
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Theme.of(context).colorScheme.onPrimaryContainer,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                TaskOption(
+                  onPressed: () {
+                    _onSelectCategory(categories);
+                  },
+                  icon: _selectedCategory?.icon ?? Icons.category,
+                  title: _selectedCategory?.name ?? "No Category",
+                  isValueSet: _selectedCategory != null,
+                  onReset: () {
+                    setState(() {
+                      _selectedCategory = null;
+                    });
+                  },
                 ),
-                SizedBox(
-                  height: 48,
-                  child: GestureDetector(
-                    onTap: () async {
-                      final pickedDate = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime.now().subtract(
-                          const Duration(days: 365),
-                        ),
-                        lastDate: DateTime.now().add(
-                          const Duration(days: 365),
-                        ),
-                      );
-
+                TaskOption(
+                  onPressed: _onSelectDate,
+                  icon: Icons.calendar_month_outlined,
+                  title: _pickedDate == null ? "No Date" : DateFormat.MMMd().format(_pickedDate!),
+                  isValueSet: _pickedDate != null,
+                  onReset: () {
+                    setState(() {
+                      _pickedDate = null;
+                    });
+                  },
+                ),
+                if (_pickedDate != null)
+                  TaskOption(
+                    onPressed: _onSelectTime,
+                    icon: Icons.access_time,
+                    title: _pickedTime != null ? DateFormat.Hm().format(_pickedTime!) : "No Time",
+                    isValueSet: _pickedTime != null,
+                    onReset: () {
                       setState(() {
-                        _pickedDate = pickedDate;
+                        _pickedTime = null;
                       });
                     },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      margin: const EdgeInsets.only(right: 8),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.calendar_month_outlined,
-                            size: 24,
-                            color: Theme.of(context).colorScheme.onPrimaryContainer,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            DateFormat.MMMd().format(_pickedDate ?? DateTime.now()),
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Theme.of(context).colorScheme.onPrimaryContainer,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                   ),
-                ),
               ],
+            ),
+            const SizedBox(
+              height: 16,
             ),
             Align(
               alignment: Alignment.centerRight,
@@ -248,7 +248,7 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
-                onPressed: _addNewTask,
+                onPressed: isTitleValid ? _addNewTask : null,
                 icon: Icon(
                   Icons.add,
                   color: Theme.of(context).colorScheme.onPrimaryContainer,

@@ -12,10 +12,21 @@ class Tasks extends StateNotifier<List<TaskData>> {
     state = state.map((element) => element.id == task.id ? task : element).toList();
   }
 
+  void forceUpdateTask(TaskData task) {
+    state = state.map((element) => element.id == task.id ? task : element).toList();
+  }
+
   void toggleTask(TaskData task) {
     state = state
         .map((element) =>
             element.id == task.id ? task.copyWith(isCompleted: !task.isCompleted) : element)
+        .toList();
+  }
+
+  void toggleStarTask(TaskData task) {
+    state = state
+        .map((element) =>
+            element.id == task.id ? task.copyWith(isStarred: !task.isStarred) : element)
         .toList();
   }
 

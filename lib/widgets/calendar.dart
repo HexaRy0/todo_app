@@ -21,9 +21,9 @@ class _CalendarState extends State<Calendar> {
 
   List<TaskData> _getTasksForDay(DateTime day) {
     return widget.tasks.where((element) {
-      return element.date.year == day.year &&
-          element.date.month == day.month &&
-          element.date.day == day.day;
+      return element.date?.year == day.year &&
+          element.date?.month == day.month &&
+          element.date?.day == day.day;
     }).toList();
   }
 

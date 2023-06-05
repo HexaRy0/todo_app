@@ -6,6 +6,7 @@ import 'package:todo_app/model/category.dart';
 import 'package:todo_app/model/task.dart';
 import 'package:todo_app/providers/category_provider.dart';
 import 'package:todo_app/providers/task_provider.dart';
+import 'package:todo_app/screens/task_detail/task_detail.dart';
 import 'package:todo_app/widgets/chips.dart';
 
 class TaskListScreen extends ConsumerStatefulWidget {
@@ -184,7 +185,15 @@ class TaskListScreenState extends ConsumerState<TaskListScreen> {
                   ),
                   child: GestureDetector(
                     onTap: () {
-                      setState(() {});
+                      setState(() {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => TaskDetailScreen(
+                              taskId: task.id,
+                            ),
+                          ),
+                        );
+                      });
                     },
                     child: Container(
                       margin: const EdgeInsets.symmetric(horizontal: 8),
@@ -211,7 +220,7 @@ class TaskListScreenState extends ConsumerState<TaskListScreen> {
                                 value: isTaskFinished,
                                 onChanged: (value) {
                                   setState(() {
-                                    task.isCompleted = value!;
+                                    ref.read(tasksProvider.notifier).toggleTask(task);
                                   });
                                 },
                               ),
@@ -230,45 +239,73 @@ class TaskListScreenState extends ConsumerState<TaskListScreen> {
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
-                                  Text(
-                                    task.description,
-                                    style: TextStyle(
-                                      decoration:
-                                          isTaskFinished ? TextDecoration.lineThrough : null,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w400,
+                                  if (task.description.isNotEmpty)
+                                    Text(
+                                      task.description,
+                                      style: TextStyle(
+                                        decoration:
+                                            isTaskFinished ? TextDecoration.lineThrough : null,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400,
+                                      ),
                                     ),
-                                  ),
                                   const SizedBox(height: 4),
                                   Wrap(
                                     direction: Axis.horizontal,
                                     spacing: 5.0,
                                     children: [
-                                      Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            Icons.calendar_today,
-                                            size: 16,
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .onSurface
-                                                .withOpacity(0.5),
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            DateFormat.yMd().format(task.date),
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w400,
+                                      if (task.date != null)
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.calendar_today,
+                                              size: 16,
                                               color: Theme.of(context)
                                                   .colorScheme
                                                   .onSurface
                                                   .withOpacity(0.5),
                                             ),
-                                          ),
-                                        ],
-                                      ),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              DateFormat.yMd().format(task.date!),
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w400,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurface
+                                                    .withOpacity(0.5),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      if (task.time != null)
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.access_time,
+                                              size: 16,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurface
+                                                  .withOpacity(0.5),
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              DateFormat.Hm().format(task.time!),
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w400,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurface
+                                                    .withOpacity(0.5),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [

@@ -18,9 +18,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   Widget build(BuildContext context) {
     final tasks = ref.watch(tasksProvider);
     final filteredTaskList = tasks.where((element) {
-      return element.date.year == _selectedDay.year &&
-          element.date.month == _selectedDay.month &&
-          element.date.day == _selectedDay.day;
+      return element.date?.year == _selectedDay.year &&
+          element.date?.month == _selectedDay.month &&
+          element.date?.day == _selectedDay.day;
     }).toList();
 
     return SingleChildScrollView(
@@ -112,7 +112,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                             value: isTaskFinished,
                             onChanged: (value) {
                               setState(() {
-                                task.isCompleted = value!;
+                                ref.read(tasksProvider.notifier).toggleTask(task);
                               });
                             },
                           ),
@@ -143,31 +143,32 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                                 direction: Axis.horizontal,
                                 spacing: 5.0,
                                 children: [
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.calendar_today,
-                                        size: 16,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSurface
-                                            .withOpacity(0.5),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        DateFormat.yMd().format(task.date),
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w400,
+                                  if (task.date != null)
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.calendar_today,
+                                          size: 16,
                                           color: Theme.of(context)
                                               .colorScheme
                                               .onSurface
                                               .withOpacity(0.5),
                                         ),
-                                      ),
-                                    ],
-                                  ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          DateFormat.yMd().format(task.date!),
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurface
+                                                .withOpacity(0.5),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
