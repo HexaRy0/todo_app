@@ -22,7 +22,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: [
               const Text("Account"),
               ListTile(
-                title: const Text('Account'),
+                title: const Text('Account Sync'),
                 leading: const Icon(Icons.account_circle),
                 onTap: () {},
               ),

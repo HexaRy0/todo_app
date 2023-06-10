@@ -5,8 +5,10 @@ import 'package:todo_app/providers/category_provider.dart';
 import 'package:todo_app/providers/task_provider.dart';
 import 'package:todo_app/screens/add_task/add_task.dart';
 import 'package:todo_app/screens/calendar/calendar.dart';
+import 'package:todo_app/screens/donate/donate.dart';
+import 'package:todo_app/screens/faq/faq.dart';
 import 'package:todo_app/screens/manage_categories/manage_categories.dart';
-import 'package:todo_app/screens/setting/setting.dart';
+import 'package:todo_app/screens/settings/settings.dart';
 import 'package:todo_app/screens/starred_task/starred_task.dart';
 import 'package:todo_app/screens/task_list/task_list.dart';
 import 'package:todo_app/widgets/category_setting_dialog.dart';
@@ -201,12 +203,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ],
               ),
               ListTile(
-                onTap: () {},
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const DonateScreen(),
+                    ),
+                  );
+                },
                 leading: const Icon(Icons.favorite),
                 title: const Text('Donate'),
               ),
               ListTile(
-                onTap: () {},
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const FaqScreen(),
+                    ),
+                  );
+                },
                 leading: const Icon(Icons.question_mark),
                 title: const Text('FAQ'),
               ),
