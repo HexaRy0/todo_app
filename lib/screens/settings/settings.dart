@@ -127,7 +127,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 leading: const Icon(Icons.info),
                 onTap: () {},
               ),
-              const Divider(),
             ],
           ),
         ),
