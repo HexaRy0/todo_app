@@ -6,6 +6,7 @@ import 'package:todo_app/providers/task_provider.dart';
 import 'package:todo_app/screens/add_task/add_task.dart';
 import 'package:todo_app/screens/calendar/calendar.dart';
 import 'package:todo_app/screens/manage_categories/manage_categories.dart';
+import 'package:todo_app/screens/starred_task/starred_task.dart';
 import 'package:todo_app/screens/task_list/task_list.dart';
 import 'package:todo_app/widgets/category_setting_dialog.dart';
 import 'package:todo_app/widgets/menu_button.dart';
@@ -125,7 +126,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
               ListTile(
-                onTap: () {},
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const StarredTaskScreen(),
+                    ),
+                  );
+                },
                 leading: const Icon(Icons.star),
                 title: const Text('Starred Tasks'),
               ),
@@ -171,7 +178,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         leading: Icon(category.icon),
                         title: Text(category.name),
                         trailing: Text(
-                          tasks.where((element) => element.category == category).length.toString(),
+                          tasks
+                              .where((element) => element.categoryId == category.id)
+                              .length
+                              .toString(),
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
                           ),

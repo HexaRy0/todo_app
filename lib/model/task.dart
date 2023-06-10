@@ -1,12 +1,10 @@
-import 'package:todo_app/model/category.dart';
-
 class TaskData {
   final String id;
   final String title;
   final String description;
   final DateTime? date;
   final DateTime? time;
-  final CategoryData? category;
+  final String? categoryId;
   final bool isStarred;
   final bool isCompleted;
 
@@ -16,7 +14,7 @@ class TaskData {
     required this.description,
     this.date,
     this.time,
-    this.category,
+    this.categoryId,
     this.isStarred = false,
     this.isCompleted = false,
   });
@@ -27,7 +25,7 @@ class TaskData {
     String? description,
     DateTime? date,
     DateTime? time,
-    CategoryData? category,
+    String? categoryId,
     bool? isStarred,
     bool? isCompleted,
     bool force = false,
@@ -39,7 +37,7 @@ class TaskData {
         description: description!,
         date: date!,
         time: time!,
-        category: category!,
+        categoryId: categoryId!,
         isStarred: isStarred!,
         isCompleted: isCompleted!,
       );
@@ -51,7 +49,7 @@ class TaskData {
       description: description ?? this.description,
       date: date ?? this.date,
       time: time ?? this.time,
-      category: category ?? this.category,
+      categoryId: categoryId ?? this.categoryId,
       isStarred: isStarred ?? this.isStarred,
       isCompleted: isCompleted ?? this.isCompleted,
     );

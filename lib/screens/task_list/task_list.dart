@@ -24,7 +24,7 @@ class TaskListScreenState extends ConsumerState<TaskListScreen> {
     final selectedCategory = ref.watch(selectedCategoryProvider);
     List<TaskData> filteredTaskList = selectedCategory == null
         ? tasks
-        : tasks.where((element) => element.category == selectedCategory).toList();
+        : tasks.where((element) => element.categoryId == selectedCategory.id).toList();
 
     return ListView(
       shrinkWrap: true,
@@ -110,6 +110,9 @@ class TaskListScreenState extends ConsumerState<TaskListScreen> {
             itemBuilder: (context, index) {
               final task = filteredTaskList[index];
               final isTaskFinished = task.isCompleted;
+              final category = task.categoryId == null
+                  ? null
+                  : categories.firstWhere((element) => element.id == task.categoryId);
 
               return Container(
                 margin: const EdgeInsets.symmetric(vertical: 4),
@@ -200,9 +203,9 @@ class TaskListScreenState extends ConsumerState<TaskListScreen> {
                     child: Container(
                       margin: const EdgeInsets.symmetric(horizontal: 8),
                       decoration: BoxDecoration(
-                        color: task.category != null
+                        color: category != null
                             ? ColorScheme.fromSeed(
-                                seedColor: task.category!.color,
+                                seedColor: category.color,
                                 brightness: Theme.of(context).brightness,
                               ).primaryContainer
                             : Theme.of(context).colorScheme.primaryContainer,
@@ -218,7 +221,7 @@ class TaskListScreenState extends ConsumerState<TaskListScreen> {
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Transform.scale(
                               scale: 1.25,
@@ -251,15 +254,6 @@ class TaskListScreenState extends ConsumerState<TaskListScreen> {
                                       const SizedBox(
                                         width: 8,
                                       ),
-                                      if (task.isStarred)
-                                        Icon(
-                                          Icons.star,
-                                          size: 16,
-                                          color: ColorScheme.fromSeed(
-                                            seedColor: Colors.yellow,
-                                            brightness: Theme.of(context).brightness,
-                                          ).primary,
-                                        ),
                                     ],
                                   ),
                                   if (task.description.isNotEmpty)
@@ -333,7 +327,7 @@ class TaskListScreenState extends ConsumerState<TaskListScreen> {
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Icon(
-                                            task.category?.icon ?? Icons.category,
+                                            category?.icon ?? Icons.category,
                                             size: 16,
                                             color: Theme.of(context)
                                                 .colorScheme
@@ -342,7 +336,7 @@ class TaskListScreenState extends ConsumerState<TaskListScreen> {
                                           ),
                                           const SizedBox(width: 4),
                                           Text(
-                                            task.category?.name ?? "No Category",
+                                            category?.name ?? "No Category",
                                             style: TextStyle(
                                               fontSize: 14,
                                               fontWeight: FontWeight.w400,
@@ -357,6 +351,22 @@ class TaskListScreenState extends ConsumerState<TaskListScreen> {
                                     ],
                                   ),
                                 ],
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  ref.read(tasksProvider.notifier).toggleStarTask(task);
+                                });
+                              },
+                              icon: Icon(
+                                task.isStarred ? Icons.star : Icons.star_outline,
+                                color: task.isStarred
+                                    ? ColorScheme.fromSeed(
+                                        seedColor: Colors.yellow,
+                                        brightness: Theme.of(context).brightness,
+                                      ).primary
+                                    : Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
                               ),
                             ),
                           ],

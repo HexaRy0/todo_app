@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:todo_app/providers/category_provider.dart';
 import 'package:todo_app/providers/task_provider.dart';
 import 'package:todo_app/widgets/calendar.dart';
 
@@ -86,11 +87,21 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               itemBuilder: (context, index) {
                 final task = filteredTaskList[index];
                 final isTaskFinished = task.isCompleted;
+                final category = task.categoryId == null
+                    ? null
+                    : ref
+                        .read(categoriesProvider)
+                        .firstWhere((element) => element.id == task.categoryId);
 
                 return Container(
                   margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer,
+                    color: category != null
+                        ? ColorScheme.fromSeed(
+                            seedColor: category.color,
+                            brightness: Theme.of(context).brightness,
+                          ).primaryContainer
+                        : Theme.of(context).colorScheme.primaryContainer,
                     borderRadius: BorderRadius.circular(8),
                     boxShadow: [
                       BoxShadow(
@@ -103,7 +114,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Transform.scale(
                           scale: 1.25,
@@ -130,14 +141,15 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                              Text(
-                                task.description,
-                                style: TextStyle(
-                                  decoration: isTaskFinished ? TextDecoration.lineThrough : null,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
+                              if (task.description.isNotEmpty)
+                                Text(
+                                  task.description,
+                                  style: TextStyle(
+                                    decoration: isTaskFinished ? TextDecoration.lineThrough : null,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                  ),
                                 ),
-                              ),
                               const SizedBox(height: 4),
                               Wrap(
                                 direction: Axis.horizontal,
@@ -173,7 +185,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(
-                                        task.category?.icon ?? Icons.category,
+                                        category?.icon ?? Icons.category,
                                         size: 16,
                                         color: Theme.of(context)
                                             .colorScheme
@@ -182,7 +194,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                                       ),
                                       const SizedBox(width: 4),
                                       Text(
-                                        task.category?.name ?? "No Category",
+                                        category?.name ?? "No Category",
                                         style: TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w400,
@@ -197,6 +209,22 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                                 ],
                               ),
                             ],
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            setState(() {
+                              ref.read(tasksProvider.notifier).toggleStarTask(task);
+                            });
+                          },
+                          icon: Icon(
+                            task.isStarred ? Icons.star : Icons.star_outline,
+                            color: task.isStarred
+                                ? ColorScheme.fromSeed(
+                                    seedColor: Colors.yellow,
+                                    brightness: Theme.of(context).brightness,
+                                  ).primary
+                                : Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
                           ),
                         ),
                       ],

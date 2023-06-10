@@ -118,7 +118,7 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
         description: formData['description'] ?? "",
         date: _pickedDate,
         time: _pickedTime,
-        category: _selectedCategory,
+        categoryId: _selectedCategory?.id,
       );
 
       ref.read(tasksProvider.notifier).addTask(newTask);
@@ -207,6 +207,7 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
                   },
                   icon: _selectedCategory?.icon ?? Icons.category,
                   title: _selectedCategory?.name ?? "No Category",
+                  color: _selectedCategory?.color ?? Theme.of(context).colorScheme.primaryContainer,
                   isValueSet: _selectedCategory != null,
                   onReset: () {
                     setState(() {

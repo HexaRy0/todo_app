@@ -66,7 +66,7 @@ class _CategoryListState extends ConsumerState<CategoryList> {
                             description: widget.task.description,
                             date: widget.task.date,
                             time: widget.task.time,
-                            category: null,
+                            categoryId: null,
                             isStarred: widget.task.isStarred,
                             isCompleted: widget.task.isCompleted,
                           );
@@ -89,7 +89,7 @@ class _CategoryListState extends ConsumerState<CategoryList> {
                           setState(() {
                             ref
                                 .read(tasksProvider.notifier)
-                                .updateTask(widget.task.copyWith(category: category));
+                                .updateTask(widget.task.copyWith(categoryId: category.id));
                           });
                           Navigator.pop(context);
                         },

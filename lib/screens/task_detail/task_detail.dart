@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:todo_app/model/task.dart';
+import 'package:todo_app/providers/category_provider.dart';
 import 'package:todo_app/providers/task_provider.dart';
 import 'package:todo_app/widgets/category_list.dart';
 import 'package:todo_app/widgets/task_option.dart';
@@ -44,6 +45,9 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
       return const Scaffold();
     }
     final task = ref.watch(tasksProvider).firstWhere((element) => element.id == widget.taskId);
+    final category = task.categoryId == null
+        ? null
+        : ref.watch(categoriesProvider).firstWhere((element) => element.id == task.categoryId);
 
     return Scaffold(
       appBar: AppBar(
@@ -75,9 +79,9 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                 onPressed: () {
                   _onSelectCategory(task);
                 },
-                icon: task.category?.icon ?? Icons.category,
-                title: task.category?.name ?? "No Category",
-                color: task.category?.color,
+                icon: category?.icon ?? Icons.category,
+                title: category?.name ?? "No Category",
+                color: category?.color,
                 isValueSet: false,
                 onReset: () {},
               ),
@@ -170,7 +174,7 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                                   description: task.description,
                                   date: null,
                                   time: task.time,
-                                  category: task.category,
+                                  categoryId: category?.id,
                                   isStarred: task.isStarred,
                                   isCompleted: task.isCompleted,
                                 );
@@ -252,7 +256,7 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                                     description: task.description,
                                     date: task.date,
                                     time: null,
-                                    category: task.category,
+                                    categoryId: category?.id,
                                     isStarred: task.isStarred,
                                     isCompleted: task.isCompleted,
                                   );
