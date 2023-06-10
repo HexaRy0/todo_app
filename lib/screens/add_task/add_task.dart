@@ -6,7 +6,7 @@ import 'package:todo_app/model/category.dart';
 import 'package:todo_app/model/task.dart';
 import 'package:todo_app/providers/category_provider.dart';
 import 'package:todo_app/providers/task_provider.dart';
-import 'package:todo_app/widgets/chips.dart';
+import 'package:todo_app/widgets/add_task_category_list.dart';
 import 'package:todo_app/widgets/task_option.dart';
 import 'package:uuid/uuid.dart';
 
@@ -28,49 +28,9 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
   void _onSelectCategory(List<CategoryData> categories) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Select Category"),
-        content: SizedBox(
-          width: 300,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ...categories.map((category) {
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    height: 48,
-                    width: double.infinity,
-                    child: Chips(
-                      category: category,
-                      isActive: true,
-                      onPressed: () {
-                        setState(() {
-                          _selectedCategory = category;
-                        });
-                        Navigator.pop(context);
-                      },
-                    ),
-                  );
-                }),
-                SizedBox(
-                  height: 48,
-                  width: double.infinity,
-                  child: Chips(
-                    category: CategoryData(
-                      id: "new",
-                      name: "Add Category",
-                      icon: Icons.add,
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                    ),
-                    isActive: true,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+      builder: (context) => AddTaskCategoryList(onSelectCategory: (category) {
+        _selectedCategory = category;
+      }),
     );
   }
 

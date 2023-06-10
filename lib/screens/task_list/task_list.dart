@@ -18,6 +18,7 @@ class TaskListScreenState extends ConsumerState<TaskListScreen> {
   bool isPreviousTaskExpanded = true;
   bool isTodayTaskExpanded = true;
   bool isUpcomingTaskExpanded = true;
+  bool isCompletedTaskExpanded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -28,19 +29,24 @@ class TaskListScreenState extends ConsumerState<TaskListScreen> {
         ? tasks
         : tasks.where((element) => element.categoryId == selectedCategory.id).toList();
     List<TaskData> previousTaskList = filteredTaskList
-        .where((element) => element.date != null ? element.date!.day < DateTime.now().day : false)
+        .where((element) =>
+            (element.date != null ? element.date!.day < DateTime.now().day : false) &&
+            !element.isCompleted)
         .toList();
     List<TaskData> todayTaskList = filteredTaskList
         .where((element) =>
-            element.date != null ? element.date!.day == DateTime.now().day : element.date == null)
+            (element.date != null
+                ? element.date!.day == DateTime.now().day
+                : element.date == null) &&
+            !element.isCompleted)
         .toList();
-    List<TaskData> upcomingTaskList = filteredTaskList.where((element) {
-      if (element.date != null) {
-        return element.date!.day > DateTime.now().day;
-      } else {
-        return false;
-      }
-    }).toList();
+    List<TaskData> upcomingTaskList = filteredTaskList
+        .where((element) =>
+            (element.date != null ? element.date!.day > DateTime.now().day : false) &&
+            !element.isCompleted)
+        .toList();
+    List<TaskData> completedTaskList =
+        filteredTaskList.where((element) => element.isCompleted).toList();
 
     return ListView(
       shrinkWrap: true,
@@ -125,7 +131,7 @@ class TaskListScreenState extends ConsumerState<TaskListScreen> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: ExpansionTile(
-                    initiallyExpanded: isPreviousTaskExpanded,
+                    initiallyExpanded: true,
                     shape: ShapeBorder.lerp(
                       RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
@@ -177,7 +183,7 @@ class TaskListScreenState extends ConsumerState<TaskListScreen> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: ExpansionTile(
-                    initiallyExpanded: isTodayTaskExpanded,
+                    initiallyExpanded: true,
                     shape: ShapeBorder.lerp(
                       RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
@@ -229,7 +235,7 @@ class TaskListScreenState extends ConsumerState<TaskListScreen> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: ExpansionTile(
-                    initiallyExpanded: isUpcomingTaskExpanded,
+                    initiallyExpanded: true,
                     shape: ShapeBorder.lerp(
                       RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
@@ -259,6 +265,58 @@ class TaskListScreenState extends ConsumerState<TaskListScreen> {
                         shrinkWrap: true,
                         itemBuilder: (context, index) {
                           final task = upcomingTaskList[index];
+                          final isTaskFinished = task.isCompleted;
+                          final category = task.categoryId == null
+                              ? null
+                              : categories.firstWhere((element) => element.id == task.categoryId);
+
+                          return Container(
+                            margin: const EdgeInsets.symmetric(vertical: 4),
+                            child: TaskSlide(
+                              task: task,
+                              category: category,
+                              isTaskFinished: isTaskFinished,
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              if (completedTaskList.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ExpansionTile(
+                    initiallyExpanded: false,
+                    shape: ShapeBorder.lerp(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      1,
+                    ),
+                    title: Text(
+                      "Completed Tasks",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    onExpansionChanged: (value) {
+                      setState(() {
+                        isCompletedTaskExpanded = value;
+                      });
+                    },
+                    children: [
+                      ListView.builder(
+                        primary: false,
+                        itemCount: completedTaskList.length,
+                        shrinkWrap: true,
+                        itemBuilder: (context, index) {
+                          final task = completedTaskList[index];
                           final isTaskFinished = task.isCompleted;
                           final category = task.categoryId == null
                               ? null
