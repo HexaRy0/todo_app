@@ -47,7 +47,7 @@ class _ManageCategoriesScreenState extends ConsumerState<ManageCategoriesScreen>
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Text(
-                "Drag and drop to reorder categories",
+                "Drag and drop category to reorder",
                 textAlign: TextAlign.center,
               ),
             ),
