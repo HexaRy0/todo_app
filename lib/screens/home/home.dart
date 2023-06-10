@@ -6,6 +6,7 @@ import 'package:todo_app/providers/task_provider.dart';
 import 'package:todo_app/screens/add_task/add_task.dart';
 import 'package:todo_app/screens/calendar/calendar.dart';
 import 'package:todo_app/screens/manage_categories/manage_categories.dart';
+import 'package:todo_app/screens/setting/setting.dart';
 import 'package:todo_app/screens/starred_task/starred_task.dart';
 import 'package:todo_app/screens/task_list/task_list.dart';
 import 'package:todo_app/widgets/category_setting_dialog.dart';
@@ -210,7 +211,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 title: const Text('FAQ'),
               ),
               ListTile(
-                onTap: () {},
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const SettingsScreen(),
+                    ),
+                  );
+                },
                 leading: const Icon(Icons.settings),
                 title: const Text('Settings'),
               ),
