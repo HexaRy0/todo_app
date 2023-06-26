@@ -1,9 +1,15 @@
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:todo_app/helper/task_reminder_helper.dart';
 import 'package:todo_app/screens/home/home.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await TaskReminderHelper.initialize();
+  await TaskReminderHelper.requestPermissions();
+
   runApp(const ProviderScope(child: MyApp()));
 }
 

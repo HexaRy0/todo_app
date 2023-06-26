@@ -23,6 +23,7 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
   CategoryData? _selectedCategory;
   DateTime? _pickedDate;
   DateTime? _pickedTime;
+  DateTime? _pickedReminder;
   bool isTitleValid = false;
 
   void _onSelectCategory(List<CategoryData> categories) {
@@ -34,7 +35,96 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
     );
   }
 
-  void _onSelectDate() async {
+  void _onSelectDueReminder() {
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return SimpleDialog(
+            title: const Text("Due & Reminder"),
+            children: [
+              ListTile(
+                leading: const Icon(Icons.calendar_today_outlined),
+                title: const Text("Due Date"),
+                subtitle: _pickedDate == null
+                    ? const Text("No Due Date")
+                    : Text(DateFormat.yMMMMd().format(_pickedDate!)),
+                onTap: () {
+                  _onSelectDate(setDialogState);
+                },
+                trailing: _pickedDate == null
+                    ? null
+                    : IconButton(
+                        onPressed: () {
+                          setDialogState(() {
+                            _pickedDate = null;
+                          });
+                        },
+                        icon: const Icon(Icons.clear),
+                      ),
+              ),
+              ListTile(
+                enabled: _pickedDate != null,
+                leading: const Icon(Icons.access_time_outlined),
+                title: const Text("Due Time"),
+                subtitle: _pickedTime == null
+                    ? const Text("No Due Time")
+                    : Text(DateFormat.jm().format(_pickedTime!)),
+                onTap: () {
+                  _onSelectTime(setDialogState);
+                },
+                trailing: _pickedTime == null
+                    ? null
+                    : IconButton(
+                        onPressed: () {
+                          setDialogState(() {
+                            _pickedTime = null;
+                          });
+                        },
+                        icon: const Icon(Icons.clear),
+                      ),
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.notifications),
+                title: const Text("Reminder"),
+                subtitle: _pickedReminder == null
+                    ? const Text("No Reminder")
+                    : Text(DateFormat.yMMMMd().add_jm().format(_pickedReminder!)),
+                onTap: () {
+                  // _onSelectReminder(setDialogState);
+                },
+                trailing: _pickedReminder == null
+                    ? null
+                    : IconButton(
+                        onPressed: () {
+                          setDialogState(() {
+                            _pickedReminder = null;
+                          });
+                        },
+                        icon: const Icon(Icons.clear),
+                      ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text("Done"),
+                  ),
+                ],
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  void _onSelectDate(void Function(void Function() fn) setDialogState) async {
     final pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -46,16 +136,32 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
       ),
     );
 
+    setDialogState(() {
+      if (pickedDate == null) return;
+      _pickedDate = pickedDate;
+    });
+
     setState(() {
       _pickedDate = pickedDate;
     });
   }
 
-  void _onSelectTime() async {
+  void _onSelectTime(void Function(void Function() fn) setDialogState) async {
     final pickedTime = await showTimePicker(
       context: context,
       initialTime: TimeOfDay(hour: DateTime.now().hour, minute: DateTime.now().minute),
     );
+
+    setDialogState(() {
+      if (pickedTime == null) return;
+      _pickedTime = DateTime(
+        DateTime.now().year,
+        DateTime.now().month,
+        DateTime.now().day,
+        pickedTime.hour,
+        pickedTime.minute,
+      );
+    });
 
     setState(() {
       if (pickedTime == null) return;
@@ -68,6 +174,48 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
       );
     });
   }
+
+  // void _onSelectReminder(void Function(void Function() fn) setDialogState) async {
+  //   final pickedReminder = await showDatePicker(
+  //     context: context,
+  //     initialDate: DateTime.now(),
+  //     firstDate: DateTime.now().subtract(
+  //       const Duration(days: 365),
+  //     ),
+  //     lastDate: DateTime.now().add(
+  //       const Duration(days: 365),
+  //     ),
+  //   );
+
+  //   if (pickedReminder == null) return;
+
+  //   final pickedTime = await showTimePicker(
+  //     context: context,
+  //     initialTime: TimeOfDay(hour: DateTime.now().hour, minute: DateTime.now().minute),
+  //   );
+
+  //   setDialogState(() {
+  //     if (pickedTime == null) return;
+  //     _pickedReminder = DateTime(
+  //       pickedReminder.year,
+  //       pickedReminder.month,
+  //       pickedReminder.day,
+  //       pickedTime.hour,
+  //       pickedTime.minute,
+  //     );
+  //   });
+
+  //   setState(() {
+  //     if (pickedTime == null) return;
+  //     _pickedReminder = DateTime(
+  //       pickedReminder.year,
+  //       pickedReminder.month,
+  //       pickedReminder.day,
+  //       pickedTime.hour,
+  //       pickedTime.minute,
+  //     );
+  //   });
+  // }
 
   void _addNewTask() {
     if (_addTaskFormKey.currentState!.saveAndValidate()) {
@@ -176,28 +324,12 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
                   },
                 ),
                 TaskOption(
-                  onPressed: _onSelectDate,
+                  onPressed: _onSelectDueReminder,
                   icon: Icons.calendar_month_outlined,
-                  title: _pickedDate == null ? "No Date" : DateFormat.MMMd().format(_pickedDate!),
-                  isValueSet: _pickedDate != null,
-                  onReset: () {
-                    setState(() {
-                      _pickedDate = null;
-                    });
-                  },
+                  title: "Due & Reminder",
+                  isValueSet: false,
+                  onReset: () {},
                 ),
-                if (_pickedDate != null)
-                  TaskOption(
-                    onPressed: _onSelectTime,
-                    icon: Icons.access_time,
-                    title: _pickedTime != null ? DateFormat.Hm().format(_pickedTime!) : "No Time",
-                    isValueSet: _pickedTime != null,
-                    onReset: () {
-                      setState(() {
-                        _pickedTime = null;
-                      });
-                    },
-                  ),
               ],
             ),
             const SizedBox(
