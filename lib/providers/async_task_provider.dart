@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 import 'package:todo_app/model/task.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -25,8 +26,6 @@ class AsyncTask extends _$AsyncTask {
       date: newTask.date,
       time: newTask.time,
       categoryId: newTask.categoryId,
-      isStarred: newTask.isStarred,
-      isCompleted: newTask.isCompleted,
     );
     state = await AsyncValue.guard(() async {
       await isar!.writeTxn(() async {
@@ -44,8 +43,6 @@ class AsyncTask extends _$AsyncTask {
     todo.date = task.date;
     todo.time = task.time;
     todo.categoryId = task.categoryId;
-    todo.isStarred = task.isStarred;
-    todo.isCompleted = task.isCompleted;
     state = await AsyncValue.guard(() async {
       await isar!.writeTxn(() async {
         await isar!.taskDatas.put(todo);
@@ -57,7 +54,7 @@ class AsyncTask extends _$AsyncTask {
   Future<void> toggleTask(TaskData task) async {
     state = const AsyncValue.loading();
     final todo = await isar!.taskDatas.get(task.id);
-    todo!.isCompleted = !todo.isCompleted;
+    todo!.isCompleted = !task.isCompleted;
     state = await AsyncValue.guard(() async {
       await isar!.writeTxn(() async {
         await isar!.taskDatas.put(todo);
@@ -69,7 +66,9 @@ class AsyncTask extends _$AsyncTask {
   Future<void> toggleStarTask(TaskData task) async {
     state = const AsyncValue.loading();
     final todo = await isar!.taskDatas.get(task.id);
-    todo!.isStarred = !todo.isStarred;
+    debugPrint("Wow");
+    debugPrint(todo.toString());
+    todo!.isStarred = !task.isStarred;
     state = await AsyncValue.guard(() async {
       await isar!.writeTxn(() async {
         await isar!.taskDatas.put(todo);

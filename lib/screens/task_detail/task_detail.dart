@@ -27,6 +27,20 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
   final TextEditingController _descriptionController = TextEditingController();
   bool isRemoved = false;
 
+  Widget _renderError(Object error, StackTrace stackTrace) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: const ErrorrWidget(),
+    );
+  }
+
+  Widget _renderLoading() {
+    return Scaffold(
+      appBar: AppBar(),
+      body: const LoadingWidget(),
+    );
+  }
+
   void _onSelectCategory(TaskData task) {
     showDialog(
       context: context,
@@ -63,39 +77,55 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
     if (isRemoved) {
       return const Scaffold();
     }
+
     final asyncTasks = ref.watch(asyncTaskProvider);
     final asyncCategories = ref.watch(asyncCategoryProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        actions: [
-          IconButton(
-            onPressed: () {
-              ref.read(asyncTaskProvider.notifier).toggleStarTask(widget.task);
-            },
-            icon: widget.task.isStarred ? const Icon(Icons.star) : const Icon(Icons.star_border),
-          ),
-          IconButton(
-            onPressed: () {
-              isRemoved = true;
-              ref.read(asyncTaskProvider.notifier).removeTask(widget.task);
-              Navigator.pop(context);
-            },
-            icon: const Icon(Icons.delete),
-          ),
-        ],
-      ),
-      body: WillPopScope(
-        child: asyncTasks.when(
-          data: (tasks) {
-            final task = tasks.firstWhere((element) => element.id == widget.task.id);
+    return asyncTasks.when(
+      skipLoadingOnRefresh: true,
+      skipLoadingOnReload: true,
+      data: (tasks) {
+        final task = tasks.firstWhere((element) => element.id == widget.task.id);
 
-            return asyncCategories.when(
-              data: (categories) {
-                final category = task.categoryId == null
-                    ? null
-                    : categories.firstWhere((element) => element.id == task.categoryId);
-                return SingleChildScrollView(
+        return asyncCategories.when(
+          skipLoadingOnRefresh: true,
+          skipLoadingOnReload: true,
+          data: (categories) {
+            final category = task.categoryId != null
+                ? categories.firstWhere((element) => element.id == task.categoryId)
+                : null;
+
+            return Scaffold(
+              appBar: AppBar(
+                title: Text(
+                  task.title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                actions: [
+                  IconButton(
+                    onPressed: () {
+                      ref.read(asyncTaskProvider.notifier).toggleStarTask(task);
+                    },
+                    icon: task.isStarred ? const Icon(Icons.star) : const Icon(Icons.star_border),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      isRemoved = true;
+                      ref.read(asyncTaskProvider.notifier).removeTask(task);
+                      Navigator.pop(context);
+                    },
+                    icon: const Icon(Icons.delete),
+                  ),
+                ],
+              ),
+              body: WillPopScope(
+                onWillPop: () async {
+                  return true;
+                },
+                child: SingleChildScrollView(
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     width: double.infinity,
@@ -120,6 +150,7 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                           onChanged: (value) {
                             task.title = value;
                             ref.read(asyncTaskProvider.notifier).updateTask(task);
+                            debugPrint(task.toString());
                           },
                           decoration: const InputDecoration(
                             border: InputBorder.none,
@@ -323,29 +354,26 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                       ],
                     ),
                   ),
-                );
-              },
-              error: (error, stackTrace) => const ErrorrWidget(),
-              loading: () => const LoadingWidget(),
+                ),
+              ),
+              floatingActionButton: FloatingActionButton.extended(
+                onPressed: () {
+                  ref.read(asyncTaskProvider.notifier).toggleTask(task);
+                  if (!task.isCompleted) Navigator.pop(context);
+                },
+                icon: !task.isCompleted ? const Icon(Icons.check) : const Icon(Icons.close),
+                label: !task.isCompleted
+                    ? const Text("Mark as Completed")
+                    : const Text("Mark as Uncompleted"),
+              ),
             );
           },
-          error: (error, stackTrace) => const ErrorrWidget(),
-          loading: () => const LoadingWidget(),
-        ),
-        onWillPop: () async {
-          return false;
-        },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          ref.read(asyncTaskProvider.notifier).toggleTask(widget.task);
-          if (!widget.task.isCompleted) Navigator.pop(context);
-        },
-        icon: !widget.task.isCompleted ? const Icon(Icons.check) : const Icon(Icons.close),
-        label: !widget.task.isCompleted
-            ? const Text("Mark as Completed")
-            : const Text("Mark as Uncompleted"),
-      ),
+          error: _renderError,
+          loading: _renderLoading,
+        );
+      },
+      error: _renderError,
+      loading: _renderLoading,
     );
   }
 }

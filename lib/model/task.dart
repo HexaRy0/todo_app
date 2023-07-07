@@ -23,6 +23,11 @@ class TaskData {
     this.isStarred = false,
     this.isCompleted = false,
   });
+
+  @override
+  String toString() {
+    return 'TaskData(title: $title, description: $description, date: $date, time: $time, categoryId: $categoryId, isStarred: $isStarred, isCompleted: $isCompleted)';
+  }
 }
 
 // class TaskData {
