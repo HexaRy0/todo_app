@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:todo_app/helper/generate_icon.dart';
 import 'package:todo_app/model/category.dart';
-import 'package:todo_app/providers/category_provider.dart';
-import 'package:todo_app/providers/task_provider.dart';
+import 'package:todo_app/providers/async_category_provider.dart';
+import 'package:todo_app/providers/async_task_provider.dart';
 import 'package:todo_app/screens/add_task/add_task.dart';
 import 'package:todo_app/screens/calendar/calendar.dart';
 import 'package:todo_app/screens/donate/donate.dart';
@@ -59,8 +60,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final tasks = ref.watch(tasksProvider);
-    final categories = ref.watch(categoriesProvider);
+    final asyncTasks = ref.watch(asyncTaskProvider);
+    final asyncCategories = ref.watch(asyncCategoryProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -107,136 +108,162 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ],
       ),
-      drawer: Drawer(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              UserAccountsDrawerHeader(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                ),
-                accountName: const Text('Merza Bolivar'),
-                accountEmail: const Text('Merza.bolivar@Gmail.com'),
-                currentAccountPicture: CircleAvatar(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  child: Text(
-                    'A',
-                    style: TextStyle(
-                      fontSize: 32,
-                      color: Theme.of(context).colorScheme.onPrimary,
-                    ),
-                  ),
-                ),
-              ),
-              ListTile(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const StarredTaskScreen(),
-                    ),
-                  );
-                },
-                leading: const Icon(Icons.star),
-                title: const Text('Starred Tasks'),
-              ),
-              ExpansionTile(
-                initiallyExpanded: true,
-                shape: ShapeBorder.lerp(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  1,
-                ),
-                leading: const Icon(Icons.category),
-                title: const Text('Categories'),
+      drawer: asyncTasks.when(
+        data: (tasks) => asyncCategories.when(
+          data: (categories) => Drawer(
+            child: SingleChildScrollView(
+              child: Column(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 16),
-                    child: ListTile(
-                      onTap: () {
-                        ref.read(selectedCategoryProvider.notifier).selectCategory(null);
-                        Navigator.of(context).pop();
-                      },
-                      leading: const Icon(Icons.category),
-                      title: const Text("All"),
-                      trailing: Text(
-                        tasks.length.toString(),
+                  UserAccountsDrawerHeader(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primaryContainer,
+                    ),
+                    accountName: const Text('Merza Bolivar'),
+                    accountEmail: const Text('Merza.bolivar@Gmail.com'),
+                    currentAccountPicture: CircleAvatar(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      child: Text(
+                        'A',
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                          fontSize: 32,
+                          color: Theme.of(context).colorScheme.onPrimary,
                         ),
                       ),
                     ),
                   ),
-                  ...categories.map(
-                    (category) => Padding(
-                      padding: const EdgeInsets.only(left: 16),
-                      child: ListTile(
-                        onTap: () {
-                          ref.read(selectedCategoryProvider.notifier).selectCategory(category);
-                          Navigator.of(context).pop();
-                        },
-                        leading: Icon(category.icon),
-                        title: Text(category.name),
-                        trailing: Text(
-                          tasks
-                              .where((element) => element.categoryId == category.id)
-                              .length
-                              .toString(),
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                  ListTile(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const StarredTaskScreen(),
+                        ),
+                      );
+                    },
+                    leading: const Icon(Icons.star),
+                    title: const Text('Starred Tasks'),
+                  ),
+                  ExpansionTile(
+                    initiallyExpanded: true,
+                    shape: ShapeBorder.lerp(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      1,
+                    ),
+                    leading: const Icon(Icons.category),
+                    title: const Text('Categories'),
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 16),
+                        child: ListTile(
+                          onTap: () {
+                            ref.read(selectedCategoryProvider.notifier).selectCategory(null);
+                            Navigator.of(context).pop();
+                          },
+                          leading: const Icon(Icons.category),
+                          title: const Text("All"),
+                          trailing: Text(
+                            tasks.length.toString(),
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                            ),
                           ),
                         ),
                       ),
-                    ),
+                      ...categories.map(
+                        (category) => Padding(
+                          padding: const EdgeInsets.only(left: 16),
+                          child: ListTile(
+                            onTap: () {
+                              ref.read(selectedCategoryProvider.notifier).selectCategory(category);
+                              Navigator.of(context).pop();
+                            },
+                            leading: Icon(generateIcon(category.icon)),
+                            title: Text(category.name),
+                            trailing: Text(
+                              tasks
+                                  .where((element) => element.categoryId == category.id)
+                                  .length
+                                  .toString(),
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 16),
+                        child: ListTile(
+                          onTap: _openCategorySetting,
+                          leading: const Icon(Icons.add),
+                          title: const Text('Add Category'),
+                        ),
+                      ),
+                    ],
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 16),
-                    child: ListTile(
-                      onTap: _openCategorySetting,
-                      leading: const Icon(Icons.add),
-                      title: const Text('Add Category'),
-                    ),
+                  ListTile(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const DonateScreen(),
+                        ),
+                      );
+                    },
+                    leading: const Icon(Icons.favorite),
+                    title: const Text('Donate'),
+                  ),
+                  ListTile(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const FaqScreen(),
+                        ),
+                      );
+                    },
+                    leading: const Icon(Icons.question_mark),
+                    title: const Text('FAQ'),
+                  ),
+                  ListTile(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const SettingsScreen(),
+                        ),
+                      );
+                    },
+                    leading: const Icon(Icons.settings),
+                    title: const Text('Settings'),
                   ),
                 ],
               ),
-              ListTile(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const DonateScreen(),
-                    ),
-                  );
-                },
-                leading: const Icon(Icons.favorite),
-                title: const Text('Donate'),
-              ),
-              ListTile(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const FaqScreen(),
-                    ),
-                  );
-                },
-                leading: const Icon(Icons.question_mark),
-                title: const Text('FAQ'),
-              ),
-              ListTile(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const SettingsScreen(),
-                    ),
-                  );
-                },
-                leading: const Icon(Icons.settings),
-                title: const Text('Settings'),
-              ),
-            ],
+            ),
           ),
+          error: (error, stackTrace) => Center(
+            child: Text(
+              error.toString(),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                  ),
+            ),
+          ),
+          loading: () => const Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+        error: (error, stackTrace) => Center(
+          child: Text(
+            error.toString(),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                ),
+          ),
+        ),
+        loading: () => const Center(
+          child: CircularProgressIndicator(),
         ),
       ),
       body: _pages[index],

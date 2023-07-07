@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:todo_app/model/category.dart';
 import 'package:todo_app/model/task.dart';
-import 'package:todo_app/providers/task_provider.dart';
+import 'package:todo_app/providers/async_task_provider.dart';
 import 'package:todo_app/widgets/task_tile.dart';
 
 class TaskSlide extends ConsumerStatefulWidget {
@@ -21,7 +21,7 @@ class _TaskSlideState extends ConsumerState<TaskSlide> {
   @override
   Widget build(BuildContext context) {
     return Slidable(
-        key: Key(widget.task.id),
+        key: Key(widget.task.id.toString()),
         groupTag: "task",
         startActionPane: ActionPane(
           motion: const ScrollMotion(),
@@ -30,7 +30,7 @@ class _TaskSlideState extends ConsumerState<TaskSlide> {
             SlidableAction(
               borderRadius: BorderRadius.circular(8),
               onPressed: (context) {
-                ref.read(tasksProvider.notifier).toggleTask(widget.task);
+                ref.read(asyncTaskProvider.notifier).toggleTask(widget.task);
               },
               backgroundColor: ColorScheme.fromSeed(
                 seedColor: !widget.isTaskFinished ? Colors.green : Colors.red,
@@ -49,7 +49,7 @@ class _TaskSlideState extends ConsumerState<TaskSlide> {
           motion: const ScrollMotion(),
           extentRatio: 0.5,
           dismissible: DismissiblePane(onDismissed: () {
-            ref.read(tasksProvider.notifier).removeTask(widget.task);
+            ref.read(asyncTaskProvider.notifier).removeTask(widget.task);
           }),
           children: [
             SlidableAction(
@@ -77,7 +77,7 @@ class _TaskSlideState extends ConsumerState<TaskSlide> {
               flex: 5,
               borderRadius: BorderRadius.circular(8),
               onPressed: (context) {
-                ref.read(tasksProvider.notifier).removeTask(widget.task);
+                ref.read(asyncTaskProvider.notifier).removeTask(widget.task);
               },
               backgroundColor: ColorScheme.fromSeed(
                 seedColor: Colors.red,

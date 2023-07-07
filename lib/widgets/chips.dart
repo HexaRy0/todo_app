@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:todo_app/helper/generate_color.dart';
+import 'package:todo_app/helper/generate_icon.dart';
 import 'package:todo_app/model/category.dart';
 
 class Chips extends StatefulWidget {
@@ -30,11 +32,11 @@ class _ChipsState extends State<Chips> {
         decoration: BoxDecoration(
           color: widget.isActive
               ? ColorScheme.fromSeed(
-                  seedColor: widget.category.color,
+                  seedColor: generateColor(widget.category.color, context),
                   brightness: Theme.of(context).brightness,
                 ).primaryContainer
               : ColorScheme.fromSeed(
-                  seedColor: widget.category.color,
+                  seedColor: generateColor(widget.category.color, context),
                   brightness: Theme.of(context).brightness,
                 ).primaryContainer.withOpacity(0.25),
           borderRadius: BorderRadius.circular(999),
@@ -43,10 +45,10 @@ class _ChipsState extends State<Chips> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              widget.category.icon,
+              generateIcon(widget.category.icon),
               size: 24,
               color: ColorScheme.fromSeed(
-                seedColor: widget.category.color,
+                seedColor: generateColor(widget.category.color, context),
                 brightness: Theme.of(context).brightness,
               ).onPrimaryContainer,
             ),
@@ -56,7 +58,7 @@ class _ChipsState extends State<Chips> {
               style: TextStyle(
                 fontSize: 16,
                 color: ColorScheme.fromSeed(
-                  seedColor: widget.category.color,
+                  seedColor: generateColor(widget.category.color, context),
                   brightness: Theme.of(context).brightness,
                 ).onPrimaryContainer,
               ),

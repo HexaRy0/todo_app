@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:todo_app/helper/generate_color.dart';
+import 'package:todo_app/helper/generate_icon.dart';
 import 'package:todo_app/model/category.dart';
 import 'package:todo_app/model/task.dart';
-import 'package:todo_app/providers/category_provider.dart';
-import 'package:todo_app/providers/task_provider.dart';
+import 'package:todo_app/providers/async_category_provider.dart';
+import 'package:todo_app/providers/async_task_provider.dart';
 import 'package:todo_app/widgets/add_task_category_list.dart';
 import 'package:todo_app/widgets/task_option.dart';
 import 'package:uuid/uuid.dart';
@@ -221,7 +223,6 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
     if (_addTaskFormKey.currentState!.saveAndValidate()) {
       final formData = _addTaskFormKey.currentState!.value;
       final newTask = TaskData(
-        id: uuid.v4(),
         title: formData['title'],
         description: formData['description'] ?? "",
         date: _pickedDate,
@@ -229,136 +230,144 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
         categoryId: _selectedCategory?.id,
       );
 
-      ref.read(tasksProvider.notifier).addTask(newTask);
+      ref.read(asyncTaskProvider.notifier).addTask(newTask);
       Navigator.pop(context);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final categories = ref.watch(categoriesProvider);
+    final asyncCategories = ref.watch(asyncCategoryProvider);
     final mediaQuery = MediaQuery.of(context);
 
-    return FormBuilder(
-      key: _addTaskFormKey,
-      child: Padding(
-        padding: EdgeInsets.only(
-          top: 16,
-          right: 16,
-          bottom: mediaQuery.viewInsets.bottom + 16,
-          left: 16,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            FormBuilderTextField(
-              name: 'title',
-              autofocus: true,
-              decoration: const InputDecoration(
-                hintText: "Enter Task Name",
-                filled: true,
-                contentPadding: EdgeInsets.symmetric(
-                  vertical: 4,
-                  horizontal: 12,
+    return asyncCategories.when(
+      data: (categories) => FormBuilder(
+        key: _addTaskFormKey,
+        child: Padding(
+          padding: EdgeInsets.only(
+            top: 16,
+            right: 16,
+            bottom: mediaQuery.viewInsets.bottom + 16,
+            left: 16,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FormBuilderTextField(
+                name: 'title',
+                autofocus: true,
+                decoration: const InputDecoration(
+                  hintText: "Enter Task Name",
+                  filled: true,
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 4,
+                    horizontal: 12,
+                  ),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide.none,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                    ),
+                  ),
                 ),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide.none,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
+                onChanged: (value) {
+                  setState(() {
+                    if (value != null) isTitleValid = true;
+                  });
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter title';
+                  }
+                  return null;
+                },
+              ),
+              FormBuilderTextField(
+                name: 'description',
+                style: const TextStyle(
+                  fontSize: 14,
+                  height: 1.5,
+                ),
+                decoration: const InputDecoration(
+                  filled: true,
+                  hintText: "Enter Task Description (Optional)",
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 4,
+                    horizontal: 12,
+                  ),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide.none,
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(16),
+                      bottomRight: Radius.circular(16),
+                    ),
                   ),
                 ),
               ),
-              onChanged: (value) {
-                setState(() {
-                  if (value != null) isTitleValid = true;
-                });
-              },
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter title';
-                }
-                return null;
-              },
-            ),
-            FormBuilderTextField(
-              name: 'description',
-              style: const TextStyle(
-                fontSize: 14,
-                height: 1.5,
-              ),
-              decoration: const InputDecoration(
-                filled: true,
-                hintText: "Enter Task Description (Optional)",
-                contentPadding: EdgeInsets.symmetric(
-                  vertical: 4,
-                  horizontal: 12,
-                ),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide.none,
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(16),
-                    bottomRight: Radius.circular(16),
+              const SizedBox(height: 16),
+              Wrap(
+                runSpacing: 8,
+                direction: Axis.horizontal,
+                children: [
+                  TaskOption(
+                    onPressed: () {
+                      _onSelectCategory(categories);
+                    },
+                    icon: generateIcon(_selectedCategory?.icon),
+                    title: _selectedCategory?.name ?? "No Category",
+                    color: generateColor(_selectedCategory?.color, context),
+                    isValueSet: _selectedCategory != null,
+                    onReset: () {
+                      setState(() {
+                        _selectedCategory = null;
+                      });
+                    },
                   ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              runSpacing: 8,
-              direction: Axis.horizontal,
-              children: [
-                TaskOption(
-                  onPressed: () {
-                    _onSelectCategory(categories);
-                  },
-                  icon: _selectedCategory?.icon ?? Icons.category,
-                  title: _selectedCategory?.name ?? "No Category",
-                  color: _selectedCategory?.color ?? Theme.of(context).colorScheme.primaryContainer,
-                  isValueSet: _selectedCategory != null,
-                  onReset: () {
-                    setState(() {
-                      _selectedCategory = null;
-                    });
-                  },
-                ),
-                TaskOption(
-                  onPressed: _onSelectDueReminder,
-                  icon: Icons.calendar_month_outlined,
-                  title: "Due & Reminder",
-                  isValueSet: false,
-                  onReset: () {},
-                ),
-              ],
-            ),
-            const SizedBox(
-              height: 16,
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(999),
+                  TaskOption(
+                    onPressed: _onSelectDueReminder,
+                    icon: Icons.calendar_month_outlined,
+                    title: "Due & Reminder",
+                    isValueSet: false,
+                    onReset: () {},
                   ),
-                ),
-                onPressed: isTitleValid ? _addNewTask : null,
-                icon: Icon(
-                  Icons.add,
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                ),
-                label: Text(
-                  "Add Task",
-                  style: TextStyle(
+                ],
+              ),
+              const SizedBox(
+                height: 16,
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                  onPressed: isTitleValid ? _addNewTask : null,
+                  icon: Icon(
+                    Icons.add,
                     color: Theme.of(context).colorScheme.onPrimaryContainer,
                   ),
+                  label: Text(
+                    "Add Task",
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+      ),
+      error: (error, trace) => Center(
+        child: Text(error.toString()),
+      ),
+      loading: () => const Center(
+        child: CircularProgressIndicator(),
       ),
     );
   }

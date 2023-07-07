@@ -3,9 +3,9 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:form_builder_extra_fields/form_builder_extra_fields.dart';
+import 'package:todo_app/helper/generate_color.dart';
+import 'package:todo_app/helper/generate_icon.dart';
 import 'package:todo_app/model/category.dart';
-import 'package:todo_app/providers/category_provider.dart';
-import 'package:uuid/uuid.dart';
 
 class CategorySettingDialog extends ConsumerStatefulWidget {
   const CategorySettingDialog({super.key, this.isEdit = false, this.category, this.setState});
@@ -86,7 +86,7 @@ class _CategorySettingDialogState extends ConsumerState<CategorySettingDialog> {
                       ),
                       icon: widget.isEdit
                           ? widget.category?.icon != null
-                              ? Icon(widget.category?.icon)
+                              ? Icon(generateIcon(widget.category?.icon))
                               : const Icon(Icons.category)
                           : _selectedIcon ?? const Icon(Icons.category),
                       label: const Text("Pick Icon"),
@@ -102,7 +102,9 @@ class _CategorySettingDialogState extends ConsumerState<CategorySettingDialog> {
                       border: OutlineInputBorder(),
                     ),
                     initialValue: widget.isEdit && widget.category?.color != null
-                        ? ColorScheme.fromSeed(seedColor: widget.category!.color).primary
+                        ? ColorScheme.fromSeed(
+                            seedColor: generateColor(widget.category!.color, context),
+                          ).primary
                         : Theme.of(context).colorScheme.primary,
                     colorPickerType: ColorPickerType.blockPicker,
                     availableColors: _colorList,
@@ -121,25 +123,24 @@ class _CategorySettingDialogState extends ConsumerState<CategorySettingDialog> {
             TextButton(
               onPressed: () {
                 if (_addCategoryFormKey.currentState!.saveAndValidate()) {
-                  if (widget.isEdit) {
-                    final tempCategory = CategoryData(
-                      id: widget.category!.id,
-                      name: _addCategoryFormKey.currentState?.value['name'],
-                      icon: _selectedIcon?.icon ?? widget.category!.icon,
-                      color: _addCategoryFormKey.currentState?.value['color'] as Color,
-                    );
+                  // TODO: Implement Add Category
+                  // if (widget.isEdit) {
+                  //   final tempCategory = CategoryData(
+                  //     name: _addCategoryFormKey.currentState?.value['name'],
+                  //     icon: _selectedIcon?.icon ?? widget.category!.icon,
+                  //     color: _addCategoryFormKey.currentState?.value['color'] as Color,
+                  //   );
 
-                    ref.read(categoriesProvider.notifier).updateCategory(tempCategory);
-                  } else {
-                    final tempCategory = CategoryData(
-                      id: const Uuid().v4(),
-                      name: _addCategoryFormKey.currentState?.value['name'],
-                      icon: _selectedIcon?.icon ?? Icons.category,
-                      color: _addCategoryFormKey.currentState?.value['color'] as Color,
-                    );
+                  //   ref.read(asyncCategoryProvider.notifier).updateCategory(tempCategory);
+                  // } else {
+                  //   final tempCategory = CategoryData(
+                  //     name: _addCategoryFormKey.currentState?.value['name'],
+                  //     icon: _selectedIcon?.icon ?? Icons.category,
+                  //     color: _addCategoryFormKey.currentState?.value['color'] as Color,
+                  //   );
 
-                    ref.read(categoriesProvider.notifier).addCategory(tempCategory);
-                  }
+                  //   ref.read(asyncCategoryProvider.notifier).addCategory(tempCategory);
+                  // }
 
                   setState(() {
                     _selectedIcon = null;

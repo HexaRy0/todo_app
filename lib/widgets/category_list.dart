@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:todo_app/helper/available_icon.dart';
 import 'package:todo_app/model/category.dart';
 import 'package:todo_app/model/task.dart';
-import 'package:todo_app/providers/category_provider.dart';
-import 'package:todo_app/providers/task_provider.dart';
+import 'package:todo_app/providers/async_category_provider.dart';
+import 'package:todo_app/providers/async_task_provider.dart';
 import 'package:todo_app/widgets/category_setting_dialog.dart';
 import 'package:todo_app/widgets/chips.dart';
+import 'package:todo_app/widgets/errorr_widget.dart';
+import 'package:todo_app/widgets/loading_widget.dart';
 
 class CategoryList extends ConsumerStatefulWidget {
   const CategoryList({super.key, required this.task});
@@ -34,88 +37,90 @@ class _CategoryListState extends ConsumerState<CategoryList> {
 
   @override
   Widget build(BuildContext context) {
-    final categories = ref.watch(categoriesProvider);
+    final asyncCategories = ref.watch(asyncCategoryProvider);
 
     return StatefulBuilder(
       builder: (context, setDialogState) {
-        return AlertDialog(
-          title: const Text("Select Category"),
-          content: SizedBox(
-            width: 300,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    height: 48,
-                    width: double.infinity,
-                    child: Chips(
-                      category: CategoryData(
-                        id: "na",
-                        name: "No Category",
-                        icon: Icons.category,
-                        color: Theme.of(context).colorScheme.primaryContainer,
-                      ),
-                      isActive: true,
-                      onPressed: () {
-                        setState(() {
-                          final newTask = TaskData(
-                            id: widget.task.id,
-                            title: widget.task.title,
-                            description: widget.task.description,
-                            date: widget.task.date,
-                            time: widget.task.time,
-                            categoryId: null,
-                            isStarred: widget.task.isStarred,
-                            isCompleted: widget.task.isCompleted,
-                          );
-
-                          ref.read(tasksProvider.notifier).forceUpdateTask(newTask);
-                        });
-                        Navigator.pop(context);
-                      },
-                    ),
-                  ),
-                  ...categories.map((category) {
-                    return Container(
+        return asyncCategories.when(
+          data: (categories) => AlertDialog(
+            title: const Text("Select Category"),
+            content: SizedBox(
+              width: 300,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
                       margin: const EdgeInsets.only(bottom: 8),
                       height: 48,
                       width: double.infinity,
                       child: Chips(
-                        category: category,
+                        category: CategoryData(
+                          name: "No Category",
+                          icon: AvailableIcon.category,
+                          color: null,
+                        ),
                         isActive: true,
                         onPressed: () {
                           setState(() {
-                            ref
-                                .read(tasksProvider.notifier)
-                                .updateTask(widget.task.copyWith(categoryId: category.id));
+                            final newTask = TaskData(
+                              title: widget.task.title,
+                              description: widget.task.description,
+                              date: widget.task.date,
+                              time: widget.task.time,
+                              categoryId: null,
+                              isStarred: widget.task.isStarred,
+                              isCompleted: widget.task.isCompleted,
+                            );
+
+                            ref.read(asyncTaskProvider.notifier).updateTask(newTask);
                           });
                           Navigator.pop(context);
                         },
                       ),
-                    );
-                  }),
-                  SizedBox(
-                    height: 48,
-                    width: double.infinity,
-                    child: Chips(
-                      category: CategoryData(
-                        id: "new",
-                        name: "Add Category",
-                        icon: Icons.add,
-                        color: Theme.of(context).colorScheme.primaryContainer,
-                      ),
-                      isActive: true,
-                      onPressed: () {
-                        _openCategorySetting(setState: setState);
-                      },
                     ),
-                  ),
-                ],
+                    ...categories.map((category) {
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        height: 48,
+                        width: double.infinity,
+                        child: Chips(
+                          category: category,
+                          isActive: true,
+                          onPressed: () {
+                            setState(() {
+                              // TODO : Update Task
+                              // ref
+                              //     .read(asyncTaskProvider.notifier)
+                              //     .updateTask(widget.task.copyWith(categoryId: category.id));
+                            });
+                            Navigator.pop(context);
+                          },
+                        ),
+                      );
+                    }),
+                    SizedBox(
+                      height: 48,
+                      width: double.infinity,
+                      child: Chips(
+                        category: CategoryData(
+                          name: "Add Category",
+                          icon: AvailableIcon.add,
+                          color: null,
+                        ),
+                        isActive: true,
+                        onPressed: () {
+                          _openCategorySetting(setState: setState);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
+          error: (error, stackTrace) => const ErrorrWidget(),
+          loading: () => const LoadingWidget(),
         );
       },
     );

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:todo_app/helper/generate_color.dart';
+import 'package:todo_app/helper/generate_icon.dart';
 import 'package:todo_app/model/category.dart';
-import 'package:todo_app/providers/category_provider.dart';
-import 'package:todo_app/providers/task_provider.dart';
+import 'package:todo_app/providers/async_category_provider.dart';
+import 'package:todo_app/providers/async_task_provider.dart';
 import 'package:todo_app/widgets/category_setting_dialog.dart';
+import 'package:todo_app/widgets/errorr_widget.dart';
+import 'package:todo_app/widgets/loading_widget.dart';
 
 class ManageCategoriesScreen extends ConsumerStatefulWidget {
   const ManageCategoriesScreen({super.key});
@@ -28,8 +32,8 @@ class _ManageCategoriesScreenState extends ConsumerState<ManageCategoriesScreen>
 
   @override
   Widget build(BuildContext context) {
-    final tasks = ref.watch(tasksProvider);
-    final categories = ref.watch(categoriesProvider);
+    final asyncTasks = ref.watch(asyncTaskProvider);
+    final asyncCategories = ref.watch(asyncCategoryProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -54,70 +58,80 @@ class _ManageCategoriesScreenState extends ConsumerState<ManageCategoriesScreen>
             const SizedBox(
               height: 8,
             ),
-            ReorderableListView(
-              onReorder: (oldIndex, newIndex) {
-                ref.read(categoriesProvider.notifier).reorderCategory(oldIndex, newIndex);
-              },
-              shrinkWrap: true,
-              primary: false,
-              children: [
-                ...categories
-                    .map(
-                      (category) => Padding(
-                        key: Key(category.id),
-                        padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                        child: ListTile(
-                          onTap: () {},
-                          leading: CircleAvatar(
-                            backgroundColor: ColorScheme.fromSeed(
-                              seedColor: category.color,
-                              brightness: Theme.of(context).brightness,
-                            ).primaryContainer,
-                            child: Icon(category.icon),
-                          ),
-                          title: Text(category.name),
-                          contentPadding: EdgeInsets.zero,
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                tasks
-                                    .where((element) => element.id == category.id)
-                                    .length
-                                    .toString(),
+            asyncTasks.when(
+              data: (tasks) => asyncCategories.when(
+                data: (categories) => ReorderableListView(
+                  onReorder: (oldIndex, newIndex) {
+                    ref.read(asyncCategoryProvider.notifier).reorderCategories(oldIndex, newIndex);
+                  },
+                  shrinkWrap: true,
+                  primary: false,
+                  children: [
+                    ...categories
+                        .map(
+                          (category) => Padding(
+                            key: Key(category.id.toString()),
+                            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                            child: ListTile(
+                              onTap: () {},
+                              leading: CircleAvatar(
+                                backgroundColor: ColorScheme.fromSeed(
+                                  seedColor: generateColor(category.color, context),
+                                  brightness: Theme.of(context).brightness,
+                                ).primaryContainer,
+                                child: Icon(generateIcon(category.icon)),
                               ),
-                              PopupMenuButton(
-                                offset: const Offset(0, 50),
-                                itemBuilder: (context) {
-                                  return const [
-                                    PopupMenuItem(
-                                      value: 0,
-                                      child: Text("Edit"),
-                                    ),
-                                    PopupMenuItem(
-                                      value: 1,
-                                      child: Text("Delete"),
-                                    ),
-                                  ];
-                                },
-                                onSelected: (value) {
-                                  if (value == 0) {
-                                    _openCategorySetting(
-                                      category: category,
-                                      isEdit: true,
-                                    );
-                                  } else if (value == 1) {
-                                    ref.read(categoriesProvider.notifier).removeCategory(category);
-                                  }
-                                },
+                              title: Text(category.name),
+                              contentPadding: EdgeInsets.zero,
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    tasks
+                                        .where((element) => element.id == category.id)
+                                        .length
+                                        .toString(),
+                                  ),
+                                  PopupMenuButton(
+                                    offset: const Offset(0, 50),
+                                    itemBuilder: (context) {
+                                      return const [
+                                        PopupMenuItem(
+                                          value: 0,
+                                          child: Text("Edit"),
+                                        ),
+                                        PopupMenuItem(
+                                          value: 1,
+                                          child: Text("Delete"),
+                                        ),
+                                      ];
+                                    },
+                                    onSelected: (value) {
+                                      if (value == 0) {
+                                        _openCategorySetting(
+                                          category: category,
+                                          isEdit: true,
+                                        );
+                                      } else if (value == 1) {
+                                        ref
+                                            .read(asyncCategoryProvider.notifier)
+                                            .removeCategory(category);
+                                      }
+                                    },
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
-                    )
-                    .toList(),
-              ],
+                        )
+                        .toList(),
+                  ],
+                ),
+                error: (error, stack) => const ErrorrWidget(),
+                loading: () => const LoadingWidget(),
+              ),
+              error: (error, stack) => const ErrorrWidget(),
+              loading: () => const LoadingWidget(),
             ),
             ListTile(
               leading: const Icon(Icons.add),

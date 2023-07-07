@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:todo_app/helper/generate_color.dart';
+import 'package:todo_app/helper/generate_icon.dart';
 import 'package:todo_app/model/category.dart';
 import 'package:todo_app/model/task.dart';
-import 'package:todo_app/providers/task_provider.dart';
+import 'package:todo_app/providers/async_task_provider.dart';
 import 'package:todo_app/screens/task_detail/task_detail.dart';
 
 class TaskTile extends ConsumerStatefulWidget {
@@ -26,7 +28,7 @@ class _TaskTileState extends ConsumerState<TaskTile> {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => TaskDetailScreen(
-                taskId: widget.task.id,
+                task: widget.task,
               ),
             ),
           );
@@ -37,7 +39,7 @@ class _TaskTileState extends ConsumerState<TaskTile> {
         decoration: BoxDecoration(
           color: widget.category != null
               ? ColorScheme.fromSeed(
-                  seedColor: widget.category!.color,
+                  seedColor: generateColor(widget.category!.color, context),
                   brightness: Theme.of(context).brightness,
                 ).primaryContainer
               : Theme.of(context).colorScheme.primaryContainer,
@@ -62,7 +64,7 @@ class _TaskTileState extends ConsumerState<TaskTile> {
                   value: widget.isTaskFinished,
                   onChanged: (value) {
                     setState(() {
-                      ref.read(tasksProvider.notifier).toggleTask(widget.task);
+                      ref.read(asyncTaskProvider.notifier).toggleTask(widget.task);
                     });
                   },
                 ),
@@ -145,7 +147,7 @@ class _TaskTileState extends ConsumerState<TaskTile> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              widget.category?.icon ?? Icons.category,
+                              generateIcon(widget.category?.icon),
                               size: 16,
                               color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
                             ),
@@ -168,7 +170,7 @@ class _TaskTileState extends ConsumerState<TaskTile> {
               IconButton(
                 onPressed: () {
                   setState(() {
-                    ref.read(tasksProvider.notifier).toggleStarTask(widget.task);
+                    ref.read(asyncTaskProvider.notifier).toggleStarTask(widget.task);
                   });
                 },
                 icon: Icon(

@@ -1,7 +1,11 @@
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:isar/isar.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:todo_app/helper/task_reminder_helper.dart';
+import 'package:todo_app/model/category.dart';
+import 'package:todo_app/model/task.dart';
 import 'package:todo_app/screens/home/home.dart';
 
 void main() async {
@@ -9,6 +13,9 @@ void main() async {
 
   await TaskReminderHelper.initialize();
   await TaskReminderHelper.requestPermissions();
+
+  final dir = await getApplicationDocumentsDirectory();
+  await Isar.open([TaskDataSchema, CategoryDataSchema], directory: dir.path, name: 'todo_app');
 
   runApp(const ProviderScope(child: MyApp()));
 }
