@@ -20,7 +20,7 @@ const TaskDataSchema = CollectionSchema(
     r'categoryId': PropertySchema(
       id: 0,
       name: r'categoryId',
-      type: IsarType.long,
+      type: IsarType.string,
     ),
     r'date': PropertySchema(
       id: 1,
@@ -73,6 +73,12 @@ int _taskDataEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  {
+    final value = object.categoryId;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.description.length * 3;
   bytesCount += 3 + object.title.length * 3;
   return bytesCount;
@@ -84,7 +90,7 @@ void _taskDataSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeLong(offsets[0], object.categoryId);
+  writer.writeString(offsets[0], object.categoryId);
   writer.writeDateTime(offsets[1], object.date);
   writer.writeString(offsets[2], object.description);
   writer.writeBool(offsets[3], object.isCompleted);
@@ -100,7 +106,7 @@ TaskData _taskDataDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = TaskData(
-    categoryId: reader.readLongOrNull(offsets[0]),
+    categoryId: reader.readStringOrNull(offsets[0]),
     date: reader.readDateTimeOrNull(offsets[1]),
     description: reader.readString(offsets[2]),
     isCompleted: reader.readBoolOrNull(offsets[3]) ?? false,
@@ -120,7 +126,7 @@ P _taskDataDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 1:
       return (reader.readDateTimeOrNull(offset)) as P;
     case 2:
@@ -245,46 +251,54 @@ extension TaskDataQueryFilter
   }
 
   QueryBuilder<TaskData, TaskData, QAfterFilterCondition> categoryIdEqualTo(
-      int? value) {
+    String? value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'categoryId',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<TaskData, TaskData, QAfterFilterCondition> categoryIdGreaterThan(
-    int? value, {
+    String? value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
         property: r'categoryId',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<TaskData, TaskData, QAfterFilterCondition> categoryIdLessThan(
-    int? value, {
+    String? value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
         property: r'categoryId',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<TaskData, TaskData, QAfterFilterCondition> categoryIdBetween(
-    int? lower,
-    int? upper, {
+    String? lower,
+    String? upper, {
     bool includeLower = true,
     bool includeUpper = true,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
@@ -293,6 +307,76 @@ extension TaskDataQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TaskData, TaskData, QAfterFilterCondition> categoryIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'categoryId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TaskData, TaskData, QAfterFilterCondition> categoryIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'categoryId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TaskData, TaskData, QAfterFilterCondition> categoryIdContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'categoryId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TaskData, TaskData, QAfterFilterCondition> categoryIdMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'categoryId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TaskData, TaskData, QAfterFilterCondition> categoryIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'categoryId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<TaskData, TaskData, QAfterFilterCondition>
+      categoryIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'categoryId',
+        value: '',
       ));
     });
   }
@@ -963,9 +1047,10 @@ extension TaskDataQuerySortThenBy
 
 extension TaskDataQueryWhereDistinct
     on QueryBuilder<TaskData, TaskData, QDistinct> {
-  QueryBuilder<TaskData, TaskData, QDistinct> distinctByCategoryId() {
+  QueryBuilder<TaskData, TaskData, QDistinct> distinctByCategoryId(
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'categoryId');
+      return query.addDistinctBy(r'categoryId', caseSensitive: caseSensitive);
     });
   }
 
@@ -1016,7 +1101,7 @@ extension TaskDataQueryProperty
     });
   }
 
-  QueryBuilder<TaskData, int?, QQueryOperations> categoryIdProperty() {
+  QueryBuilder<TaskData, String?, QQueryOperations> categoryIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'categoryId');
     });

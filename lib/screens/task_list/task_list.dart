@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:todo_app/helper/available_icon.dart';
 import 'package:todo_app/model/category.dart';
 import 'package:todo_app/model/task.dart';
 import 'package:todo_app/providers/async_category_provider.dart';
@@ -33,7 +32,7 @@ class TaskListScreenState extends ConsumerState<TaskListScreen> {
         data: (tasks) {
           List<TaskData> filteredTaskList = selectedCategory == null
               ? tasks
-              : tasks.where((element) => element.categoryId == selectedCategory.id).toList();
+              : tasks.where((element) => element.categoryId == selectedCategory.catId).toList();
           List<TaskData> previousTaskList = filteredTaskList
               .where((element) =>
                   (element.date != null ? element.date!.day < DateTime.now().day : false) &&
@@ -69,9 +68,11 @@ class TaskListScreenState extends ConsumerState<TaskListScreen> {
                             children: [
                               Chips(
                                 category: CategoryData(
+                                  catId: "All",
+                                  order: 0,
                                   name: "All",
-                                  icon: AvailableIcon.category,
-                                  color: null,
+                                  icon: Icons.category.codePoint,
+                                  color: Theme.of(context).colorScheme.primaryContainer.value,
                                 ),
                                 isActive: selectedCategory == null,
                                 onPressed: () {
@@ -175,7 +176,7 @@ class TaskListScreenState extends ConsumerState<TaskListScreen> {
                                         final category = task.categoryId == null
                                             ? null
                                             : categories.firstWhere(
-                                                (element) => element.id == task.categoryId);
+                                                (element) => element.catId == task.categoryId);
 
                                         return Container(
                                           margin: const EdgeInsets.symmetric(vertical: 4),
@@ -228,7 +229,10 @@ class TaskListScreenState extends ConsumerState<TaskListScreen> {
                                         final category = task.categoryId == null
                                             ? null
                                             : categories.firstWhere(
-                                                (element) => element.id == task.categoryId);
+                                                (element) {
+                                                  return element.catId == task.categoryId;
+                                                },
+                                              );
 
                                         return Container(
                                           margin: const EdgeInsets.symmetric(vertical: 4),
@@ -281,7 +285,7 @@ class TaskListScreenState extends ConsumerState<TaskListScreen> {
                                         final category = task.categoryId == null
                                             ? null
                                             : categories.firstWhere(
-                                                (element) => element.id == task.categoryId);
+                                                (element) => element.catId == task.categoryId);
 
                                         return Container(
                                           margin: const EdgeInsets.symmetric(vertical: 4),
@@ -334,7 +338,7 @@ class TaskListScreenState extends ConsumerState<TaskListScreen> {
                                         final category = task.categoryId == null
                                             ? null
                                             : categories.firstWhere(
-                                                (element) => element.id == task.categoryId);
+                                                (element) => element.catId == task.categoryId);
 
                                         return Container(
                                           margin: const EdgeInsets.symmetric(vertical: 4),

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:todo_app/helper/generate_color.dart';
-import 'package:todo_app/helper/generate_icon.dart';
 import 'package:todo_app/model/category.dart';
 import 'package:todo_app/providers/async_category_provider.dart';
 import 'package:todo_app/providers/async_task_provider.dart';
@@ -59,9 +57,14 @@ class _ManageCategoriesScreenState extends ConsumerState<ManageCategoriesScreen>
               height: 8,
             ),
             asyncTasks.when(
+              skipLoadingOnRefresh: true,
+              skipLoadingOnReload: true,
               data: (tasks) => asyncCategories.when(
+                skipLoadingOnRefresh: true,
+                skipLoadingOnReload: true,
                 data: (categories) => ReorderableListView(
                   onReorder: (oldIndex, newIndex) {
+                    debugPrint("Old Index: $oldIndex, New Index: $newIndex");
                     ref.read(asyncCategoryProvider.notifier).reorderCategories(oldIndex, newIndex);
                   },
                   shrinkWrap: true,
@@ -76,10 +79,10 @@ class _ManageCategoriesScreenState extends ConsumerState<ManageCategoriesScreen>
                               onTap: () {},
                               leading: CircleAvatar(
                                 backgroundColor: ColorScheme.fromSeed(
-                                  seedColor: generateColor(category.color, context),
+                                  seedColor: Color(category.color),
                                   brightness: Theme.of(context).brightness,
                                 ).primaryContainer,
-                                child: Icon(generateIcon(category.icon)),
+                                child: Icon(IconData(category.icon, fontFamily: 'MaterialIcons')),
                               ),
                               title: Text(category.name),
                               contentPadding: EdgeInsets.zero,
@@ -88,7 +91,7 @@ class _ManageCategoriesScreenState extends ConsumerState<ManageCategoriesScreen>
                                 children: [
                                   Text(
                                     tasks
-                                        .where((element) => element.id == category.id)
+                                        .where((element) => element.categoryId == category.catId)
                                         .length
                                         .toString(),
                                   ),

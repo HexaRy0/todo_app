@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:todo_app/helper/generate_color.dart';
-import 'package:todo_app/helper/generate_icon.dart';
 import 'package:todo_app/model/category.dart';
 import 'package:todo_app/model/task.dart';
 import 'package:todo_app/providers/async_task_provider.dart';
@@ -39,7 +37,7 @@ class _TaskTileState extends ConsumerState<TaskTile> {
         decoration: BoxDecoration(
           color: widget.category != null
               ? ColorScheme.fromSeed(
-                  seedColor: generateColor(widget.category!.color, context),
+                  seedColor: Color(widget.category!.color),
                   brightness: Theme.of(context).brightness,
                 ).primaryContainer
               : Theme.of(context).colorScheme.primaryContainer,
@@ -147,7 +145,9 @@ class _TaskTileState extends ConsumerState<TaskTile> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              generateIcon(widget.category?.icon),
+                              widget.category?.icon != null
+                                  ? IconData(widget.category!.icon, fontFamily: 'MaterialIcons')
+                                  : Icons.category,
                               size: 16,
                               color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
                             ),

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:todo_app/helper/generate_color.dart';
-import 'package:todo_app/helper/generate_icon.dart';
 import 'package:todo_app/model/category.dart';
 import 'package:todo_app/model/task.dart';
 import 'package:todo_app/providers/async_category_provider.dart';
@@ -227,7 +225,7 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
         description: formData['description'] ?? "",
         date: _pickedDate,
         time: _pickedTime,
-        categoryId: _selectedCategory?.id,
+        categoryId: _selectedCategory?.catId,
       );
 
       ref.read(asyncTaskProvider.notifier).addTask(newTask);
@@ -315,9 +313,13 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
                     onPressed: () {
                       _onSelectCategory(categories);
                     },
-                    icon: generateIcon(_selectedCategory?.icon),
+                    icon: _selectedCategory?.icon == null
+                        ? Icons.category
+                        : IconData(_selectedCategory!.icon, fontFamily: 'MaterialIcons'),
                     title: _selectedCategory?.name ?? "No Category",
-                    color: generateColor(_selectedCategory?.color, context),
+                    color: _selectedCategory?.color == null
+                        ? Theme.of(context).colorScheme.primaryContainer
+                        : Color(_selectedCategory!.color),
                     isValueSet: _selectedCategory != null,
                     onReset: () {
                       setState(() {

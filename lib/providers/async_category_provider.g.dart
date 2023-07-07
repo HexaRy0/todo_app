@@ -6,7 +6,7 @@ part of 'async_category_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$asyncCategoryHash() => r'e3243180698b9c57049a53ed468764f3c8fb1541';
+String _$asyncCategoryHash() => r'1aad735bb052d42f508681a2248c6e38e9ff30c7';
 
 /// See also [AsyncCategory].
 @ProviderFor(AsyncCategory)

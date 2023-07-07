@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:todo_app/helper/generate_color.dart';
-import 'package:todo_app/helper/generate_icon.dart';
 import 'package:todo_app/model/task.dart';
 import 'package:todo_app/providers/async_category_provider.dart';
 import 'package:todo_app/providers/async_task_provider.dart';
@@ -92,7 +90,7 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
           skipLoadingOnReload: true,
           data: (categories) {
             final category = task.categoryId != null
-                ? categories.firstWhere((element) => element.id == task.categoryId)
+                ? categories.firstWhere((element) => element.catId == task.categoryId)
                 : null;
 
             return Scaffold(
@@ -136,9 +134,13 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                           onPressed: () {
                             _onSelectCategory(task);
                           },
-                          icon: generateIcon(category?.icon),
+                          icon: category?.icon == null
+                              ? Icons.category
+                              : IconData(category!.icon, fontFamily: 'MaterialIcons'),
                           title: category?.name ?? "No Category",
-                          color: generateColor(category?.color, context),
+                          color: category?.color == null
+                              ? Theme.of(context).colorScheme.primaryContainer
+                              : Color(category!.color),
                           isValueSet: false,
                           onReset: () {},
                         ),
@@ -150,7 +152,6 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                           onChanged: (value) {
                             task.title = value;
                             ref.read(asyncTaskProvider.notifier).updateTask(task);
-                            debugPrint(task.toString());
                           },
                           decoration: const InputDecoration(
                             border: InputBorder.none,
@@ -234,7 +235,7 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                                             description: task.description,
                                             date: null,
                                             time: task.time,
-                                            categoryId: category?.id,
+                                            categoryId: category?.catId,
                                             isStarred: task.isStarred,
                                             isCompleted: task.isCompleted,
                                           );
@@ -318,7 +319,7 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                                               description: task.description,
                                               date: task.date,
                                               time: null,
-                                              categoryId: category?.id,
+                                              categoryId: category?.catId,
                                               isStarred: task.isStarred,
                                               isCompleted: task.isCompleted,
                                             );

@@ -10,7 +10,7 @@ class TaskData {
   String description;
   DateTime? date;
   DateTime? time;
-  int? categoryId;
+  String? categoryId;
   bool isStarred;
   bool isCompleted;
 

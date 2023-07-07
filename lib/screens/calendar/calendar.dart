@@ -94,7 +94,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                     final isTaskFinished = task.isCompleted;
                     final category = task.categoryId == null
                         ? null
-                        : categories.firstWhere((element) => element.id == task.categoryId);
+                        : categories.firstWhere((element) => element.catId == task.categoryId);
 
                     return TaskSlide(
                         task: task, category: category, isTaskFinished: isTaskFinished);

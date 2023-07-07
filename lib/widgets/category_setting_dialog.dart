@@ -3,9 +3,11 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:form_builder_extra_fields/form_builder_extra_fields.dart';
-import 'package:todo_app/helper/generate_color.dart';
-import 'package:todo_app/helper/generate_icon.dart';
 import 'package:todo_app/model/category.dart';
+import 'package:todo_app/providers/async_category_provider.dart';
+import 'package:uuid/uuid.dart';
+
+const uuid = Uuid();
 
 class CategorySettingDialog extends ConsumerStatefulWidget {
   const CategorySettingDialog({super.key, this.isEdit = false, this.category, this.setState});
@@ -21,6 +23,7 @@ class CategorySettingDialog extends ConsumerStatefulWidget {
 class _CategorySettingDialogState extends ConsumerState<CategorySettingDialog> {
   final GlobalKey<FormBuilderState> _addCategoryFormKey = GlobalKey<FormBuilderState>();
   Icon? _selectedIcon;
+  late CategoryData _category;
   final List<MaterialColor> _colorList = [
     Colors.red,
     Colors.green,
@@ -38,6 +41,15 @@ class _CategorySettingDialogState extends ConsumerState<CategorySettingDialog> {
     Colors.lime,
     Colors.amber,
   ];
+
+  @override
+  void initState() {
+    if (widget.isEdit) {
+      _category = widget.category!;
+      _selectedIcon = Icon(IconData(_category.icon, fontFamily: 'MaterialIcons'));
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +98,7 @@ class _CategorySettingDialogState extends ConsumerState<CategorySettingDialog> {
                       ),
                       icon: widget.isEdit
                           ? widget.category?.icon != null
-                              ? Icon(generateIcon(widget.category?.icon))
+                              ? Icon(IconData(widget.category!.icon, fontFamily: 'MaterialIcons'))
                               : const Icon(Icons.category)
                           : _selectedIcon ?? const Icon(Icons.category),
                       label: const Text("Pick Icon"),
@@ -103,7 +115,7 @@ class _CategorySettingDialogState extends ConsumerState<CategorySettingDialog> {
                     ),
                     initialValue: widget.isEdit && widget.category?.color != null
                         ? ColorScheme.fromSeed(
-                            seedColor: generateColor(widget.category!.color, context),
+                            seedColor: Color(widget.category!.color),
                           ).primary
                         : Theme.of(context).colorScheme.primary,
                     colorPickerType: ColorPickerType.blockPicker,
@@ -123,24 +135,28 @@ class _CategorySettingDialogState extends ConsumerState<CategorySettingDialog> {
             TextButton(
               onPressed: () {
                 if (_addCategoryFormKey.currentState!.saveAndValidate()) {
-                  // TODO: Implement Add Category
-                  // if (widget.isEdit) {
-                  //   final tempCategory = CategoryData(
-                  //     name: _addCategoryFormKey.currentState?.value['name'],
-                  //     icon: _selectedIcon?.icon ?? widget.category!.icon,
-                  //     color: _addCategoryFormKey.currentState?.value['color'] as Color,
-                  //   );
+                  if (widget.isEdit) {
+                    _category.name = _addCategoryFormKey.currentState?.value['name'];
+                    _category.icon = _selectedIcon?.icon != null
+                        ? _selectedIcon!.icon!.codePoint
+                        : Icons.category.codePoint;
+                    _category.color =
+                        (_addCategoryFormKey.currentState?.value['color'] as Color).value;
 
-                  //   ref.read(asyncCategoryProvider.notifier).updateCategory(tempCategory);
-                  // } else {
-                  //   final tempCategory = CategoryData(
-                  //     name: _addCategoryFormKey.currentState?.value['name'],
-                  //     icon: _selectedIcon?.icon ?? Icons.category,
-                  //     color: _addCategoryFormKey.currentState?.value['color'] as Color,
-                  //   );
+                    ref.read(asyncCategoryProvider.notifier).updateCategory(_category);
+                  } else {
+                    final tempCategory = CategoryData(
+                      catId: uuid.v4(),
+                      order: 0,
+                      name: _addCategoryFormKey.currentState?.value['name'],
+                      icon: _selectedIcon?.icon != null
+                          ? _selectedIcon!.icon!.codePoint
+                          : Icons.category.codePoint,
+                      color: (_addCategoryFormKey.currentState?.value['color'] as Color).value,
+                    );
 
-                  //   ref.read(asyncCategoryProvider.notifier).addCategory(tempCategory);
-                  // }
+                    ref.read(asyncCategoryProvider.notifier).addCategory(tempCategory);
+                  }
 
                   setState(() {
                     _selectedIcon = null;

@@ -30,8 +30,8 @@ class _StarredTaskScreenState extends ConsumerState<StarredTaskScreen> {
           List<TaskData> filteredTaskList = selectedCategory == null
               ? tasks.where((element) => element.isStarred).toList()
               : tasks
-                  .where(
-                      (element) => element.categoryId == selectedCategory.id && element.isStarred)
+                  .where((element) =>
+                      element.categoryId == selectedCategory.catId && element.isStarred)
                   .toList();
 
           return asyncCategories.when(
@@ -85,7 +85,7 @@ class _StarredTaskScreenState extends ConsumerState<StarredTaskScreen> {
                       final isTaskFinished = task.isCompleted;
                       final category = task.categoryId == null
                           ? null
-                          : categories.firstWhere((element) => element.id == task.categoryId);
+                          : categories.firstWhere((element) => element.catId == task.categoryId);
 
                       return TaskSlide(
                           task: task, category: category, isTaskFinished: isTaskFinished);

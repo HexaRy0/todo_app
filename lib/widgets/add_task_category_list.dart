@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:todo_app/helper/available_icon.dart';
 import 'package:todo_app/model/category.dart';
 import 'package:todo_app/providers/async_category_provider.dart';
 import 'package:todo_app/widgets/category_setting_dialog.dart';
@@ -55,9 +54,11 @@ class _AddTaskCategoryListState extends ConsumerState<AddTaskCategoryList> {
                       width: double.infinity,
                       child: Chips(
                         category: CategoryData(
+                          catId: "Add",
+                          order: 0,
                           name: "Add Category",
-                          icon: AvailableIcon.add,
-                          color: null,
+                          icon: Icons.add.codePoint,
+                          color: Theme.of(context).colorScheme.primaryContainer.value,
                         ),
                         isActive: true,
                         onPressed: () {

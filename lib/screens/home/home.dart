@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:todo_app/helper/generate_icon.dart';
 import 'package:todo_app/model/category.dart';
 import 'package:todo_app/providers/async_category_provider.dart';
 import 'package:todo_app/providers/async_task_provider.dart';
@@ -181,11 +180,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               ref.read(selectedCategoryProvider.notifier).selectCategory(category);
                               Navigator.of(context).pop();
                             },
-                            leading: Icon(generateIcon(category.icon)),
+                            leading: Icon(IconData(category.icon, fontFamily: 'MaterialIcons')),
                             title: Text(category.name),
                             trailing: Text(
                               tasks
-                                  .where((element) => element.categoryId == category.id)
+                                  .where((element) => element.categoryId == category.catId)
                                   .length
                                   .toString(),
                               style: TextStyle(

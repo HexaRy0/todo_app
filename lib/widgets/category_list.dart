@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:todo_app/helper/available_icon.dart';
 import 'package:todo_app/model/category.dart';
 import 'package:todo_app/model/task.dart';
 import 'package:todo_app/providers/async_category_provider.dart';
@@ -56,9 +55,11 @@ class _CategoryListState extends ConsumerState<CategoryList> {
                       width: double.infinity,
                       child: Chips(
                         category: CategoryData(
+                          catId: "None",
+                          order: 0,
                           name: "No Category",
-                          icon: AvailableIcon.category,
-                          color: null,
+                          icon: Icons.category.codePoint,
+                          color: Theme.of(context).colorScheme.primaryContainer.value,
                         ),
                         isActive: true,
                         onPressed: () {
@@ -89,10 +90,8 @@ class _CategoryListState extends ConsumerState<CategoryList> {
                           isActive: true,
                           onPressed: () {
                             setState(() {
-                              // TODO : Update Task
-                              // ref
-                              //     .read(asyncTaskProvider.notifier)
-                              //     .updateTask(widget.task.copyWith(categoryId: category.id));
+                              widget.task.categoryId = category.catId;
+                              ref.read(asyncTaskProvider.notifier).updateTask(widget.task);
                             });
                             Navigator.pop(context);
                           },
@@ -104,9 +103,11 @@ class _CategoryListState extends ConsumerState<CategoryList> {
                       width: double.infinity,
                       child: Chips(
                         category: CategoryData(
+                          catId: "Add",
+                          order: 0,
                           name: "Add Category",
-                          icon: AvailableIcon.add,
-                          color: null,
+                          icon: Icons.add.codePoint,
+                          color: Theme.of(context).colorScheme.primaryContainer.value,
                         ),
                         isActive: true,
                         onPressed: () {

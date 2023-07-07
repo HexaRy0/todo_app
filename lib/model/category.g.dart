@@ -17,22 +17,30 @@ const CategoryDataSchema = CollectionSchema(
   name: r'CategoryData',
   id: -7531739390953836826,
   properties: {
-    r'color': PropertySchema(
+    r'catId': PropertySchema(
       id: 0,
-      name: r'color',
+      name: r'catId',
       type: IsarType.string,
-      enumMap: _CategoryDatacolorEnumValueMap,
+    ),
+    r'color': PropertySchema(
+      id: 1,
+      name: r'color',
+      type: IsarType.long,
     ),
     r'icon': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'icon',
-      type: IsarType.string,
-      enumMap: _CategoryDataiconEnumValueMap,
+      type: IsarType.long,
     ),
     r'name': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'name',
       type: IsarType.string,
+    ),
+    r'order': PropertySchema(
+      id: 4,
+      name: r'order',
+      type: IsarType.long,
     )
   },
   estimateSize: _categoryDataEstimateSize,
@@ -55,18 +63,7 @@ int _categoryDataEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
-  {
-    final value = object.color;
-    if (value != null) {
-      bytesCount += 3 + value.name.length * 3;
-    }
-  }
-  {
-    final value = object.icon;
-    if (value != null) {
-      bytesCount += 3 + value.name.length * 3;
-    }
-  }
+  bytesCount += 3 + object.catId.length * 3;
   bytesCount += 3 + object.name.length * 3;
   return bytesCount;
 }
@@ -77,9 +74,11 @@ void _categoryDataSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.color?.name);
-  writer.writeString(offsets[1], object.icon?.name);
-  writer.writeString(offsets[2], object.name);
+  writer.writeString(offsets[0], object.catId);
+  writer.writeLong(offsets[1], object.color);
+  writer.writeLong(offsets[2], object.icon);
+  writer.writeString(offsets[3], object.name);
+  writer.writeLong(offsets[4], object.order);
 }
 
 CategoryData _categoryDataDeserialize(
@@ -89,9 +88,11 @@ CategoryData _categoryDataDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = CategoryData(
-    color: _CategoryDatacolorValueEnumMap[reader.readStringOrNull(offsets[0])],
-    icon: _CategoryDataiconValueEnumMap[reader.readStringOrNull(offsets[1])],
-    name: reader.readString(offsets[2]),
+    catId: reader.readString(offsets[0]),
+    color: reader.readLong(offsets[1]),
+    icon: reader.readLong(offsets[2]),
+    name: reader.readString(offsets[3]),
+    order: reader.readLong(offsets[4]),
   );
   object.id = id;
   return object;
@@ -105,60 +106,19 @@ P _categoryDataDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (_CategoryDatacolorValueEnumMap[reader.readStringOrNull(offset)])
-          as P;
-    case 1:
-      return (_CategoryDataiconValueEnumMap[reader.readStringOrNull(offset)])
-          as P;
-    case 2:
       return (reader.readString(offset)) as P;
+    case 1:
+      return (reader.readLong(offset)) as P;
+    case 2:
+      return (reader.readLong(offset)) as P;
+    case 3:
+      return (reader.readString(offset)) as P;
+    case 4:
+      return (reader.readLong(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
 }
-
-const _CategoryDatacolorEnumValueMap = {
-  r'green': r'green',
-  r'blue': r'blue',
-  r'red': r'red',
-  r'yellow': r'yellow',
-  r'purple': r'purple',
-  r'orange': r'orange',
-  r'pink': r'pink',
-  r'indigo': r'indigo',
-  r'teal': r'teal',
-  r'cyan': r'cyan',
-  r'brown': r'brown',
-  r'grey': r'grey',
-};
-const _CategoryDatacolorValueEnumMap = {
-  r'green': AvailableColor.green,
-  r'blue': AvailableColor.blue,
-  r'red': AvailableColor.red,
-  r'yellow': AvailableColor.yellow,
-  r'purple': AvailableColor.purple,
-  r'orange': AvailableColor.orange,
-  r'pink': AvailableColor.pink,
-  r'indigo': AvailableColor.indigo,
-  r'teal': AvailableColor.teal,
-  r'cyan': AvailableColor.cyan,
-  r'brown': AvailableColor.brown,
-  r'grey': AvailableColor.grey,
-};
-const _CategoryDataiconEnumValueMap = {
-  r'add': r'add',
-  r'work': r'work',
-  r'category': r'category',
-  r'person': r'person',
-  r'shoppingBag': r'shoppingBag',
-};
-const _CategoryDataiconValueEnumMap = {
-  r'add': AvailableIcon.add,
-  r'work': AvailableIcon.work,
-  r'category': AvailableIcon.category,
-  r'person': AvailableIcon.person,
-  r'shoppingBag': AvailableIcon.shoppingBag,
-};
 
 Id _categoryDataGetId(CategoryData object) {
   return object.id;
@@ -254,74 +214,182 @@ extension CategoryDataQueryWhere
 
 extension CategoryDataQueryFilter
     on QueryBuilder<CategoryData, CategoryData, QFilterCondition> {
-  QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition>
-      colorIsNull() {
+  QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition> catIdEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'color',
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'catId',
+        value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition>
-      colorIsNotNull() {
+      catIdGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'color',
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'catId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition> catIdLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'catId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition> catIdBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'catId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition>
+      catIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'catId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition> catIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'catId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition> catIdContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'catId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition> catIdMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'catId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition>
+      catIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'catId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition>
+      catIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'catId',
+        value: '',
       ));
     });
   }
 
   QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition> colorEqualTo(
-    AvailableColor? value, {
-    bool caseSensitive = true,
-  }) {
+      int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'color',
         value: value,
-        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition>
       colorGreaterThan(
-    AvailableColor? value, {
+    int value, {
     bool include = false,
-    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
         property: r'color',
         value: value,
-        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition> colorLessThan(
-    AvailableColor? value, {
+    int value, {
     bool include = false,
-    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
         property: r'color',
         value: value,
-        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition> colorBetween(
-    AvailableColor? lower,
-    AvailableColor? upper, {
+    int lower,
+    int upper, {
     bool includeLower = true,
     bool includeUpper = true,
-    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
@@ -330,149 +398,52 @@ extension CategoryDataQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition>
-      colorStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'color',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition> colorEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'color',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition> colorContains(
-      String value,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'color',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition> colorMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'color',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition>
-      colorIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'color',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition>
-      colorIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'color',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition> iconIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'icon',
-      ));
-    });
-  }
-
-  QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition>
-      iconIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'icon',
       ));
     });
   }
 
   QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition> iconEqualTo(
-    AvailableIcon? value, {
-    bool caseSensitive = true,
-  }) {
+      int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'icon',
         value: value,
-        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition>
       iconGreaterThan(
-    AvailableIcon? value, {
+    int value, {
     bool include = false,
-    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
         property: r'icon',
         value: value,
-        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition> iconLessThan(
-    AvailableIcon? value, {
+    int value, {
     bool include = false,
-    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
         property: r'icon',
         value: value,
-        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition> iconBetween(
-    AvailableIcon? lower,
-    AvailableIcon? upper, {
+    int lower,
+    int upper, {
     bool includeLower = true,
     bool includeUpper = true,
-    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
@@ -481,78 +452,6 @@ extension CategoryDataQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition>
-      iconStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'icon',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition> iconEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'icon',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition> iconContains(
-      String value,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'icon',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition> iconMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'icon',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition>
-      iconIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'icon',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition>
-      iconIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'icon',
-        value: '',
       ));
     });
   }
@@ -743,6 +642,60 @@ extension CategoryDataQueryFilter
       ));
     });
   }
+
+  QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition> orderEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'order',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition>
+      orderGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'order',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition> orderLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'order',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<CategoryData, CategoryData, QAfterFilterCondition> orderBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'order',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension CategoryDataQueryObject
@@ -753,6 +706,18 @@ extension CategoryDataQueryLinks
 
 extension CategoryDataQuerySortBy
     on QueryBuilder<CategoryData, CategoryData, QSortBy> {
+  QueryBuilder<CategoryData, CategoryData, QAfterSortBy> sortByCatId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'catId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CategoryData, CategoryData, QAfterSortBy> sortByCatIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'catId', Sort.desc);
+    });
+  }
+
   QueryBuilder<CategoryData, CategoryData, QAfterSortBy> sortByColor() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'color', Sort.asc);
@@ -788,10 +753,34 @@ extension CategoryDataQuerySortBy
       return query.addSortBy(r'name', Sort.desc);
     });
   }
+
+  QueryBuilder<CategoryData, CategoryData, QAfterSortBy> sortByOrder() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'order', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CategoryData, CategoryData, QAfterSortBy> sortByOrderDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'order', Sort.desc);
+    });
+  }
 }
 
 extension CategoryDataQuerySortThenBy
     on QueryBuilder<CategoryData, CategoryData, QSortThenBy> {
+  QueryBuilder<CategoryData, CategoryData, QAfterSortBy> thenByCatId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'catId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CategoryData, CategoryData, QAfterSortBy> thenByCatIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'catId', Sort.desc);
+    });
+  }
+
   QueryBuilder<CategoryData, CategoryData, QAfterSortBy> thenByColor() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'color', Sort.asc);
@@ -839,21 +828,38 @@ extension CategoryDataQuerySortThenBy
       return query.addSortBy(r'name', Sort.desc);
     });
   }
+
+  QueryBuilder<CategoryData, CategoryData, QAfterSortBy> thenByOrder() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'order', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CategoryData, CategoryData, QAfterSortBy> thenByOrderDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'order', Sort.desc);
+    });
+  }
 }
 
 extension CategoryDataQueryWhereDistinct
     on QueryBuilder<CategoryData, CategoryData, QDistinct> {
-  QueryBuilder<CategoryData, CategoryData, QDistinct> distinctByColor(
+  QueryBuilder<CategoryData, CategoryData, QDistinct> distinctByCatId(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'color', caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'catId', caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<CategoryData, CategoryData, QDistinct> distinctByIcon(
-      {bool caseSensitive = true}) {
+  QueryBuilder<CategoryData, CategoryData, QDistinct> distinctByColor() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'icon', caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'color');
+    });
+  }
+
+  QueryBuilder<CategoryData, CategoryData, QDistinct> distinctByIcon() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'icon');
     });
   }
 
@@ -861,6 +867,12 @@ extension CategoryDataQueryWhereDistinct
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'name', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<CategoryData, CategoryData, QDistinct> distinctByOrder() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'order');
     });
   }
 }
@@ -873,14 +885,19 @@ extension CategoryDataQueryProperty
     });
   }
 
-  QueryBuilder<CategoryData, AvailableColor?, QQueryOperations>
-      colorProperty() {
+  QueryBuilder<CategoryData, String, QQueryOperations> catIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'catId');
+    });
+  }
+
+  QueryBuilder<CategoryData, int, QQueryOperations> colorProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'color');
     });
   }
 
-  QueryBuilder<CategoryData, AvailableIcon?, QQueryOperations> iconProperty() {
+  QueryBuilder<CategoryData, int, QQueryOperations> iconProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'icon');
     });
@@ -889,6 +906,12 @@ extension CategoryDataQueryProperty
   QueryBuilder<CategoryData, String, QQueryOperations> nameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'name');
+    });
+  }
+
+  QueryBuilder<CategoryData, int, QQueryOperations> orderProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'order');
     });
   }
 }

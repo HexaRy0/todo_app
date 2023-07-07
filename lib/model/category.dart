@@ -1,6 +1,4 @@
 import 'package:isar/isar.dart';
-import 'package:todo_app/helper/available_color.dart';
-import 'package:todo_app/helper/available_icon.dart';
 
 part 'category.g.dart';
 
@@ -8,19 +6,24 @@ part 'category.g.dart';
 class CategoryData {
   Id id = Isar.autoIncrement;
 
+  String catId;
   String name;
-
-  @Enumerated(EnumType.name)
-  AvailableIcon? icon;
-
-  @Enumerated(EnumType.name)
-  AvailableColor? color;
+  int order;
+  int icon;
+  int color;
 
   CategoryData({
+    required this.catId,
     required this.name,
+    required this.order,
     required this.icon,
     required this.color,
   });
+
+  @override
+  String toString() {
+    return 'CategoryData(catId: $catId, name: $name, order: $order, icon: $icon, color: $color)';
+  }
 }
 
 // import 'package:flutter/material.dart';

@@ -6,7 +6,7 @@ part of 'async_task_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$asyncTaskHash() => r'd312b10e7d1878d19a11391f8dd501fce20acaa2';
+String _$asyncTaskHash() => r'97d6f38074f7800429d110b0e4df9c7784f222ff';
 
 /// See also [AsyncTask].
 @ProviderFor(AsyncTask)
