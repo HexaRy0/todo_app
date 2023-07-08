@@ -11,6 +11,7 @@ import 'package:todo_app/screens/manage_categories/manage_categories.dart';
 import 'package:todo_app/screens/settings/settings.dart';
 import 'package:todo_app/screens/starred_task/starred_task.dart';
 import 'package:todo_app/screens/task_list/task_list.dart';
+import 'package:todo_app/static/strings.dart';
 import 'package:todo_app/widgets/category_setting_dialog.dart';
 import 'package:todo_app/widgets/menu_button.dart';
 
@@ -65,30 +66,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text('Todo App'),
+        title: const Text(StaticStrings.appName),
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: PopupMenuButton(
-              offset: const Offset(0, 50),
               itemBuilder: (context) {
                 return const [
                   PopupMenuItem(
                     value: 0,
-                    child: Text("My Account"),
-                  ),
-                  PopupMenuItem(
-                    value: 1,
                     child: Text("Manage Categories"),
-                  ),
-                  PopupMenuItem(
-                    value: 2,
-                    child: Text("Logout"),
                   ),
                 ];
               },
               onSelected: (value) {
-                if (value == 1) {
+                if (value == 0) {
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => const ManageCategoriesScreen(),
@@ -96,12 +88,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   );
                 }
               },
-              child: CircleAvatar(
-                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                child: const Icon(
-                  Icons.person,
-                  color: Colors.white,
-                ),
+              child: const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Icon(Icons.settings, size: 28),
               ),
             ),
           ),
@@ -113,20 +102,36 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  UserAccountsDrawerHeader(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                    ),
-                    accountName: const Text('Merza Bolivar'),
-                    accountEmail: const Text('Merza.bolivar@Gmail.com'),
-                    currentAccountPicture: CircleAvatar(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      child: Text(
-                        'A',
-                        style: TextStyle(
-                          fontSize: 32,
-                          color: Theme.of(context).colorScheme.onPrimary,
+                  SizedBox(
+                    width: double.infinity,
+                    child: DrawerHeader(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primaryContainer,
+                        borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(16),
+                          bottomRight: Radius.circular(16),
                         ),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Text(
+                            StaticStrings.appName,
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Total Tasks: ${tasks.length}',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),

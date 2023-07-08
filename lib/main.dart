@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
     return DynamicColorBuilder(
       builder: (ColorScheme? lightColorScheme, ColorScheme? darkColorScheme) {
         return MaterialApp(
-          title: 'Todo App',
+          title: 'Todo-it!',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             brightness: Brightness.light,

@@ -46,35 +46,13 @@ class _TaskSlideState extends ConsumerState<TaskSlide> {
           ],
         ),
         endActionPane: ActionPane(
+          extentRatio: 0.25,
           motion: const ScrollMotion(),
-          extentRatio: 0.5,
           dismissible: DismissiblePane(onDismissed: () {
             ref.read(asyncTaskProvider.notifier).removeTask(widget.task);
           }),
           children: [
             SlidableAction(
-              flex: 5,
-              borderRadius: BorderRadius.circular(8),
-              onPressed: (context) {},
-              backgroundColor: ColorScheme.fromSeed(
-                seedColor: Colors.orange,
-                brightness: Theme.of(context).brightness,
-              ).primaryContainer,
-              foregroundColor: ColorScheme.fromSeed(
-                seedColor: Colors.orange,
-                brightness: Theme.of(context).brightness,
-              ).onPrimaryContainer,
-              icon: Icons.edit_outlined,
-              label: 'Edit',
-            ),
-            const Flexible(
-              flex: 1,
-              child: SizedBox(
-                width: 8,
-              ),
-            ),
-            SlidableAction(
-              flex: 5,
               borderRadius: BorderRadius.circular(8),
               onPressed: (context) {
                 ref.read(asyncTaskProvider.notifier).removeTask(widget.task);
